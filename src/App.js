@@ -1,20 +1,40 @@
 import React, { useState, useEffect } from "react";
-import firebase from "./firebaseConfig"; // Firebase 설정 가져오기
 
 function App() {
   const [userData, setUserData] = useState(null);
 
   useEffect(() => {
+    // Listen for messages from Flutter
     window.addEventListener("message", (event) => {
       if (event.data.type === "auth:success") {
         console.log("Authentication success:", event.data);
-        setUserData(event.data); // 사용자 데이터 저장
+        setUserData(event.data); // Save user data
       }
     });
   }, []);
 
-  const handleGmailRedirect = () => {
-    window.open("https://mail.google.com", "_blank");
+  const handleGmailRedirect = async () => {
+    if (userData && userData.accessToken) {
+      const gmailUrl = `https://mail.google.com/mail/u/0/?authuser=${userData.email}`;
+      const headers = new Headers();
+      headers.append("Authorization", `Bearer ${userData.accessToken}`);
+
+      try {
+        // Attempt to authenticate with Gmail
+        const response = await fetch(gmailUrl, { headers });
+        if (response.ok) {
+          window.open(gmailUrl, "_blank"); // Open Gmail in a new tab
+        } else {
+          console.error("Failed to authenticate with Gmail:", response.status);
+          alert("Failed to authenticate with Gmail. Please try again.");
+        }
+      } catch (error) {
+        console.error("Error during Gmail redirect:", error);
+        alert("An error occurred. Please try again.");
+      }
+    } else {
+      alert("User is not authenticated. Please log in again.");
+    }
   };
 
   return (
