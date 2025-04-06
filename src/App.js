@@ -5,14 +5,20 @@ function App() {
 
   useEffect(() => {
     window.handleFlutterMessage = (message) => {
+      console.log("Raw message from Flutter:", message);
       try {
         const parsedData = JSON.parse(message);
+        console.log("Parsed data:", parsedData);
         setUserData(parsedData);
       } catch (error) {
         console.error("Error parsing message from Flutter:", error);
       }
     };
   }, []);
+
+  useEffect(() => {
+    console.log("Updated userData:", userData);
+  }, [userData]);
 
   return (
     <div style={{ textAlign: "center", marginTop: "50px" }}>
@@ -38,7 +44,5 @@ function App() {
     </div>
   );
 }
-
-//Something fixed
 
 export default App;
