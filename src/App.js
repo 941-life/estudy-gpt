@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import firebaseConfig from "./firebaseConfig"; // Import Firebase config
 
 function App() {
   const [userData, setUserData] = useState(null);
@@ -15,7 +16,7 @@ function App() {
 
   const verifyUser = async () => {
     if (userData && userData.accessToken) {
-      const verifyUrl = `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=YOUR_FIREBASE_API_KEY`;
+      const verifyUrl = `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${firebaseConfig.apiKey}`; // Use apiKey from firebaseConfig
 
       try {
         const response = await fetch(verifyUrl, {
@@ -33,8 +34,9 @@ function App() {
           console.log("User verified:", data.users[0]);
           alert(`User verified: ${data.users[0].email}`);
         } else {
-          console.error("Failed to verify user:", response.status);
-          alert("Failed to verify user. Please log in again.");
+          const errorData = await response.json();
+          console.error("Failed to verify user:", response.status, errorData);
+          alert(`Failed to verify user: ${errorData.error.message}`);
         }
       } catch (error) {
         console.error("Error verifying user:", error);
