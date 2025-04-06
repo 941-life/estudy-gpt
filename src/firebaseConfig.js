@@ -3,13 +3,13 @@ import { getAuth } from "firebase/auth";
 
 // Firebase 설정 객체
 const firebaseConfig = {
-  apiKey: "AIzaSyC5YiKlyI7L1ohECh0eRQ_eeIvWISMpwfQ",
-  authDomain: "estudy-67e52.firebaseapp.com",
-  projectId: "estudy-67e52",
-  storageBucket: "estudy-67e52.firebasestorage.app",
-  messagingSenderId: "670797546076",
-  appId: "1:670797546076:web:dbf056f81236a0f3065c99",
-  measurementId: "G-P4HE27QM5M",
+  apiKey: "AIzaSyDo1b3OFEjeQ5YenIB_jbcQSM8rog5eN6A",
+  authDomain: "estudy-5b2ba.firebaseapp.com",
+  projectId: "estudy-5b2ba",
+  storageBucket: "estudy-5b2ba.firebasestorage.app",
+  messagingSenderId: "398236771666",
+  appId: "1:398236771666:web:a5357d1182c1d871c2068b",
+  measurementId: "G-E7VX9YXJZ7",
 };
 
 // Firebase 앱 초기화
