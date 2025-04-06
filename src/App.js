@@ -13,23 +13,31 @@ function App() {
     });
   }, []);
 
-  const handleGmailRedirect = async () => {
+  const verifyUser = async () => {
     if (userData && userData.accessToken) {
-      const gmailUrl = `https://mail.google.com/mail/u/0/?authuser=${userData.email}`;
-      const headers = new Headers();
-      headers.append("Authorization", `Bearer ${userData.accessToken}`);
+      const verifyUrl = `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=YOUR_FIREBASE_API_KEY`;
 
       try {
-        // Attempt to authenticate with Gmail
-        const response = await fetch(gmailUrl, { headers });
+        const response = await fetch(verifyUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            idToken: userData.accessToken, // Firebase accessToken
+          }),
+        });
+
         if (response.ok) {
-          window.open(gmailUrl, "_blank"); // Open Gmail in a new tab
+          const data = await response.json();
+          console.log("User verified:", data.users[0]);
+          alert(`User verified: ${data.users[0].email}`);
         } else {
-          console.error("Failed to authenticate with Gmail:", response.status);
-          alert("Failed to authenticate with Gmail. Please try again.");
+          console.error("Failed to verify user:", response.status);
+          alert("Failed to verify user. Please log in again.");
         }
       } catch (error) {
-        console.error("Error during Gmail redirect:", error);
+        console.error("Error verifying user:", error);
         alert("An error occurred. Please try again.");
       }
     } else {
@@ -55,19 +63,19 @@ function App() {
             style={{ borderRadius: "50%", width: "100px", height: "100px" }}
           />
           <button
-            onClick={handleGmailRedirect}
+            onClick={verifyUser}
             style={{
               marginTop: "20px",
               padding: "10px 20px",
               fontSize: "16px",
-              backgroundColor: "#4285F4",
+              backgroundColor: "#34A853",
               color: "white",
               border: "none",
               borderRadius: "5px",
               cursor: "pointer",
             }}
           >
-            Open Gmail
+            Verify User
           </button>
         </div>
       ) : (
