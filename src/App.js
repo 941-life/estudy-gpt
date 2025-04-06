@@ -5,7 +5,6 @@ import { sendRouterCommand } from "./bridge";
 function App() {
   const [userData, setUserData] = useState(null);
 
-  // Flutter로부터 메시지를 수신
   useEffect(() => {
     window.handleFlutterMessage = (message) => {
       console.log("Raw message from Flutter:", message);
@@ -20,11 +19,11 @@ function App() {
   }, []);
 
   const handleLogin = () => {
-    requestGoogleLogin(); // Google 로그인 요청
+    requestGoogleLogin();
   };
 
   const navigateToPage = (path) => {
-    sendRouterCommand("navigate", path); // Flutter로 라우팅 명령 전송
+    sendRouterCommand("router:push", path);
   };
 
   return (

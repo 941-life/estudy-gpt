@@ -1,11 +1,9 @@
 // Flutter로 라우팅 명령을 전송
 export function sendRouterCommand(type, path) {
   if (window.FlutterBridge) {
-    // Flutter로 메시지 전송
     window.FlutterBridge.postMessage(JSON.stringify({ type, path }));
   } else {
-    // Flutter가 없는 경우 웹 독립 실행형 동작
-    window.location.href = path;
+    window.location.href = path; // 웹 독립 실행형 대체
   }
 }
 
