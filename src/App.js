@@ -5,6 +5,7 @@ function App() {
 
   // Flutter에서 데이터를 전달받는 함수
   useEffect(() => {
+    console.log("Defining window.handleFlutterMessage");
     window.handleFlutterMessage = (message) => {
       console.log("Raw message from Flutter:", message); // 디버깅용 로그
       try {
