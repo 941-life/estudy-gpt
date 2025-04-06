@@ -1,6 +1,6 @@
 {
   "name": "estudy_gpt_web",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "private": true,
   "dependencies": {
     "@testing-library/dom": "^10.4.0",

@@ -4,21 +4,14 @@ function App() {
   const [userData, setUserData] = useState(null);
 
   useEffect(() => {
-    window.handleFlutterMessage = (message) => {
-      console.log("Raw message from Flutter:", message);
-      try {
-        const parsedData = JSON.parse(message);
-        console.log("Parsed data:", parsedData);
-        setUserData(parsedData);
-      } catch (error) {
-        console.error("Error parsing message from Flutter:", error);
+    window.addEventListener("message", (event) => {
+      if (event.data.type === "auth:success") {
+        console.log("Authentication success:", event.data);
+        localStorage.setItem("google_token", event.data.token); // 토큰 저장
+        setUserData(event.data); // 사용자 데이터 저장
       }
-    };
+    });
   }, []);
-
-  useEffect(() => {
-    console.log("Updated userData:", userData);
-  }, [userData]);
 
   return (
     <div style={{ textAlign: "center", marginTop: "50px" }}>
