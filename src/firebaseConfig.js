@@ -1,5 +1,5 @@
 import firebase from "firebase/app";
-import "firebase/auth";
+import { getAuth } from "firebase/auth";
 
 // Firebase 설정 객체
 const firebaseConfig = {
@@ -12,9 +12,10 @@ const firebaseConfig = {
   measurementId: "G-P4HE27QM5M",
 };
 
-// Firebase 초기화
-if (!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
-}
+// Firebase 앱 초기화
+const app = initializeApp(firebaseConfig);
 
-export default firebase;
+// Firebase 인증 객체 가져오기
+const auth = getAuth(app);
+
+export { app, auth };
