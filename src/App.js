@@ -6,11 +6,13 @@ function App() {
   // Flutter에서 데이터를 전달받는 함수
   useEffect(() => {
     window.handleFlutterMessage = (message) => {
+      console.log("Raw message from Flutter:", message); // 디버깅용 로그
       try {
-        // Flutter에서 전달된 JSON 데이터를 디코딩
         const decodedMessage = decodeURIComponent(message);
+        console.log("Decoded message:", decodedMessage); // 디코딩된 메시지
         const parsedData = JSON.parse(decodedMessage);
-        setUserData(parsedData); // 상태에 저장
+        console.log("Parsed data:", parsedData); // 파싱된 데이터
+        setUserData(parsedData);
       } catch (error) {
         console.error("Error parsing message from Flutter:", error);
       }
