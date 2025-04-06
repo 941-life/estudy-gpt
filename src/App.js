@@ -1,24 +1,31 @@
 import React, { useState, useEffect } from "react";
+import { requestGoogleLogin } from "./auth";
+import { sendRouterCommand } from "./bridge";
 
 function App() {
   const [userData, setUserData] = useState(null);
 
-  // Flutter에서 데이터를 전달받는 함수
+  // Flutter로부터 메시지를 수신
   useEffect(() => {
-    console.log("Defining window.handleFlutterMessage");
     window.handleFlutterMessage = (message) => {
-      console.log("Raw message from Flutter:", message); // 디버깅용 로그
+      console.log("Raw message from Flutter:", message);
       try {
-        const decodedMessage = decodeURIComponent(message);
-        console.log("Decoded message:", decodedMessage); // 디코딩된 메시지
-        const parsedData = JSON.parse(decodedMessage);
-        console.log("Parsed data:", parsedData); // 파싱된 데이터
+        const parsedData = JSON.parse(message);
+        console.log("Parsed data:", parsedData);
         setUserData(parsedData);
       } catch (error) {
         console.error("Error parsing message from Flutter:", error);
       }
     };
   }, []);
+
+  const handleLogin = () => {
+    requestGoogleLogin(); // Google 로그인 요청
+  };
+
+  const navigateToPage = (path) => {
+    sendRouterCommand("navigate", path); // Flutter로 라우팅 명령 전송
+  };
 
   return (
     <div style={{ textAlign: "center", marginTop: "50px" }}>
@@ -37,9 +44,15 @@ function App() {
             alt="User Avatar"
             style={{ borderRadius: "50%", width: "100px", height: "100px" }}
           />
+          <button onClick={() => navigateToPage("/dashboard")}>
+            Go to Dashboard
+          </button>
         </div>
       ) : (
-        <p>No user data received yet.</p>
+        <div>
+          <p>No user data received yet.</p>
+          <button onClick={handleLogin}>Login with Google</button>
+        </div>
       )}
     </div>
   );
