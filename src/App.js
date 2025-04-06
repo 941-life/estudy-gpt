@@ -32,6 +32,7 @@ function App() {
     }
   };
 
+  //Gmail 버튼 클릭 시 Flutter로 명령 전달
   return (
     <div style={{ textAlign: "center", marginTop: "50px" }}>
       <h1>React App</h1>
