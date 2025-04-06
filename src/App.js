@@ -5,6 +5,7 @@ function App() {
 
   useEffect(() => {
     window.addEventListener("message", (event) => {
+      console.log("Received message from Flutter:", event.data);
       if (event.data.type === "auth:success") {
         console.log("Authentication success:", event.data);
         localStorage.setItem("google_token", event.data.token); // 토큰 저장
@@ -12,6 +13,10 @@ function App() {
       }
     });
   }, []);
+
+  useEffect(() => {
+    console.log("Updated userData:", userData);
+  }, [userData]);
 
   return (
     <div style={{ textAlign: "center", marginTop: "50px" }}>
