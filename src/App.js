@@ -36,7 +36,7 @@ function App() {
 
           // Display UID and email verification status
           alert(
-            `User verified:\nEmail: ${user.email}\nUID: ${user.localId}\nEmail Verified: ${user.emailVerified}`
+            `Updated User verified:\nEmail: ${user.email}\nUID: ${user.localId}\nEmail Verified: ${user.emailVerified}`
           );
         } else {
           const errorData = await response.json();
