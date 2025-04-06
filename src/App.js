@@ -31,8 +31,13 @@ function App() {
 
         if (response.ok) {
           const data = await response.json();
-          console.log("User verified:", data.users[0]);
-          alert(`User verified: ${data.users[0].email}`);
+          const user = data.users[0]; // Extract the first user object
+          console.log("User verified:", user);
+
+          // Display UID and email verification status
+          alert(
+            `User verified:\nEmail: ${user.email}\nUID: ${user.localId}\nEmail Verified: ${user.emailVerified}`
+          );
         } else {
           const errorData = await response.json();
           console.error("Failed to verify user:", response.status, errorData);
