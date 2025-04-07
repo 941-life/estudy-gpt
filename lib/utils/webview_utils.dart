@@ -1,0 +1,30 @@
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
+import 'package:webview_flutter/webview_flutter.dart';
+
+void handleWebViewMessage(WebViewController controller, String message) {
+  final data = jsonDecode(message);
+  if (data['type'] == 'router:push' && data['path'] != null) {
+    controller.loadRequest(Uri.parse(data['path']));
+  } else {
+    debugPrint('Unhandled message: $message');
+  }
+}
+
+Future<void> sendUserDataToReact(
+  WebViewController controller,
+  String email,
+  String displayName,
+  String photoUrl,
+  String accessToken,
+) async {
+  controller.runJavaScript('''
+    window.postMessage({
+      type: 'auth:success',
+      email: '$email',
+      displayName: '$displayName',
+      photoUrl: '$photoUrl',
+      accessToken: '$accessToken'
+    }, '*');
+  ''');
+}
