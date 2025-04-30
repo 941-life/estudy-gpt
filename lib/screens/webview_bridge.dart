@@ -3,11 +3,17 @@ import 'package:webview_flutter/webview_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../utils/firebase_utils.dart';
 import '../utils/webview_utils.dart';
+import 'dart:async';
 
 class WebViewBridge extends StatefulWidget {
-  final User user;
+  final User? user;
+  final String initialUrl;
 
-  const WebViewBridge({super.key, required this.user});
+  const WebViewBridge({
+    super.key,
+    required this.user,
+    required this.initialUrl,
+  });
 
   @override
   _WebViewBridgeState createState() => _WebViewBridgeState();
@@ -19,6 +25,10 @@ class _WebViewBridgeState extends State<WebViewBridge> {
   @override
   void initState() {
     super.initState();
+
+    // UID 파라미터가 포함된 URL 생성
+    final initialUri = Uri.parse(widget.initialUrl);
+
     _controller =
         WebViewController()
           ..setJavaScriptMode(JavaScriptMode.unrestricted)
@@ -36,19 +46,19 @@ class _WebViewBridgeState extends State<WebViewBridge> {
               },
             ),
           )
-          ..loadRequest(
-            Uri.parse('https://kmeanseo.github.io/estudy_gpt_web/'),
-          );
+          ..loadRequest(initialUri); // 수정된 URL 사용
   }
 
   Future<void> _sendUserDataToReact() async {
-    final String? accessToken = await getUserAccessToken(widget.user);
+    if (widget.user == null) return;
+
+    final String? accessToken = await getUserAccessToken(widget.user!);
     if (accessToken != null) {
       sendUserDataToReact(
         _controller,
-        widget.user.email ?? '',
-        widget.user.displayName ?? '',
-        widget.user.photoURL ?? '',
+        widget.user!.email ?? '',
+        widget.user!.displayName ?? '',
+        widget.user!.photoURL ?? '',
         accessToken,
       );
     }
@@ -56,6 +66,11 @@ class _WebViewBridgeState extends State<WebViewBridge> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: WebViewWidget(controller: _controller));
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('WebView Page'), // 앱 바 유지
+      ),
+      body: WebViewWidget(controller: _controller),
+    );
   }
 }
