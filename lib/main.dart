@@ -1,6 +1,8 @@
+import 'package:flutter/material.dart';
+import 'package:calendar_view/calendar_view.dart';
+import 'package:estudy_gpt/models/calendar_event.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'screens/login_screen.dart';
@@ -10,7 +12,12 @@ import 'utils/shared_intent_handler.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(const MyApp());
+  runApp(
+    CalendarControllerProvider(
+      controller: EventController(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatefulWidget {
@@ -26,10 +33,55 @@ class _MyAppState extends State<MyApp> {
   String _sharedText = '';
   late SharedIntentHandler _sharedIntentHandler;
 
+  List<Event> events = [
+    Event(date: DateTime(2025, 5, 5), title: "석가탄신일"),
+    Event(date: DateTime(2025, 5, 10), title: "어버이날"),
+    Event(date: DateTime(2025, 5, 15), title: "스승의 날"),
+    Event(date: DateTime(2025, 5, 19), title: "부처님오신날"),
+  ];
+
   @override
   void initState() {
     super.initState();
-    requestStoragePermission(); // 앱 시작 시 권한 요청
+    _initializeApp();
+  }
+
+  Future<void> _initializeApp() async {
+    await _initWidget();
+    _initSharing();
+    _addTestData(); // ✅ 테스트 데이터 추가
+  }
+
+  Future<void> _initWidget() async {
+    try {
+      final hasPermission = await requestStoragePermission();
+      if (hasPermission && mounted) {
+        await Event.updateCalendarWidget(events);
+        debugPrint('위젯 업데이트 성공: ${events.length}개 이벤트');
+      }
+    } catch (e) {
+      _showErrorDialog('위젯 초기화 실패', e.toString());
+    }
+  }
+
+  void _addTestData() {
+    if (events.length < 6) {
+      setState(() {
+        events.addAll([
+          Event(date: DateTime.now(), title: "오늘의 일정"),
+          Event(
+            date: DateTime.now().add(const Duration(days: 2)),
+            title: "플러터 프로젝트 마감",
+          ),
+        ]);
+      });
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Event.updateCalendarWidget(events);
+      });
+    }
+  }
+
+  void _initSharing() {
     _sharedIntentHandler = SharedIntentHandler(
       onDataReceived: (type, files, text) {
         if (!mounted) return;
@@ -43,28 +95,34 @@ class _MyAppState extends State<MyApp> {
     _sharedIntentHandler.init();
   }
 
-  // 저장소 권한 요청 함수
-  Future<void> requestStoragePermission() async {
-    var status = await Permission.storage.request();
-    if (!status.isGranted) {
-      // 권한 거부 시 사용자 안내
-      if (mounted) {
-        showDialog(
-          context: context,
-          builder:
-              (_) => AlertDialog(
-                title: const Text('권한 필요'),
-                content: const Text('공유 파일을 저장하려면 저장소 접근 권한이 필요합니다.'),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('확인'),
-                  ),
-                ],
-              ),
-        );
+  Future<bool> requestStoragePermission() async {
+    try {
+      final status = await Permission.storage.request();
+      if (!status.isGranted && mounted) {
+        _showErrorDialog('권한 필요', '공유 파일 저장을 위해 저장소 접근 권한이 필요합니다.');
       }
+      return status.isGranted;
+    } catch (e) {
+      _showErrorDialog('권한 오류', e.toString());
+      return false;
     }
+  }
+
+  void _showErrorDialog(String title, String message) {
+    showDialog(
+      context: context,
+      builder:
+          (_) => AlertDialog(
+            title: Text(title),
+            content: Text(message),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('확인'),
+              ),
+            ],
+          ),
+    );
   }
 
   @override

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'webview_bridge.dart';
 import 'login_screen.dart';
+import 'calendar_screen.dart';
 
 class MainScreen extends StatefulWidget {
   final User user;
@@ -42,7 +43,6 @@ class _MainScreenState extends State<MainScreen> {
     ];
   }
 
-  // MainScreen의 _checkSharedData()
   void _checkSharedData() {
     if (widget.sharingType == 'text' || widget.sharingType == 'file') {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -58,6 +58,16 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
       body: _buildBody(),
       bottomNavigationBar: _buildBottomNavBar(),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const CalendarScreen()),
+          );
+        },
+        child: const Icon(Icons.calendar_today),
+        tooltip: 'Open Calendar',
+      ),
     );
   }
 
