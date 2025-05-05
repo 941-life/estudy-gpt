@@ -1,4 +1,3 @@
-// 초기 미디어 화면 (앱이 종료됐다가 실행될 때 공유된 파일용)
 import 'package:flutter/material.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
