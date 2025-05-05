@@ -1,122 +1,158 @@
 import 'package:flutter/material.dart';
+import 'package:calendar_view/calendar_view.dart';
+import 'package:estudy_gpt/models/calendar_event.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:receive_sharing_intent/receive_sharing_intent.dart';
+import 'screens/login_screen.dart';
+import 'screens/main_screen.dart';
+import 'utils/shared_intent_handler.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(
+    CalendarControllerProvider(
+      controller: EventController(),
+      child: const MyApp(),
+    ),
+  );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  String _sharingType = 'none';
+  List<SharedMediaFile> _sharedFiles = [];
+  String _sharedText = '';
+  late SharedIntentHandler _sharedIntentHandler;
+
+  List<Event> events = [
+    Event(date: DateTime(2025, 5, 5), title: "석가탄신일"),
+    Event(date: DateTime(2025, 5, 10), title: "어버이날"),
+    Event(date: DateTime(2025, 5, 15), title: "스승의 날"),
+    Event(date: DateTime(2025, 5, 19), title: "부처님오신날"),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeApp();
+  }
+
+  Future<void> _initializeApp() async {
+    await _initWidget();
+    _initSharing();
+    _addTestData(); // ✅ 테스트 데이터 추가
+  }
+
+  Future<void> _initWidget() async {
+    try {
+      final hasPermission = await requestStoragePermission();
+      if (hasPermission && mounted) {
+        await Event.updateCalendarWidget(events);
+        debugPrint('위젯 업데이트 성공: ${events.length}개 이벤트');
+      }
+    } catch (e) {
+      _showErrorDialog('위젯 초기화 실패', e.toString());
+    }
+  }
+
+  void _addTestData() {
+    if (events.length < 6) {
+      setState(() {
+        events.addAll([
+          Event(date: DateTime.now(), title: "오늘의 일정"),
+          Event(
+            date: DateTime.now().add(const Duration(days: 2)),
+            title: "플러터 프로젝트 마감",
+          ),
+        ]);
+      });
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Event.updateCalendarWidget(events);
+      });
+    }
+  }
+
+  void _initSharing() {
+    _sharedIntentHandler = SharedIntentHandler(
+      onDataReceived: (type, files, text) {
+        if (!mounted) return;
+        setState(() {
+          _sharingType = type;
+          _sharedFiles = files;
+          _sharedText = text;
+        });
+      },
+    );
+    _sharedIntentHandler.init();
+  }
+
+  Future<bool> requestStoragePermission() async {
+    try {
+      final status = await Permission.storage.request();
+      if (!status.isGranted && mounted) {
+        _showErrorDialog('권한 필요', '공유 파일 저장을 위해 저장소 접근 권한이 필요합니다.');
+      }
+      return status.isGranted;
+    } catch (e) {
+      _showErrorDialog('권한 오류', e.toString());
+      return false;
+    }
+  }
+
+  void _showErrorDialog(String title, String message) {
+    showDialog(
+      context: context,
+      builder:
+          (_) => AlertDialog(
+            title: Text(title),
+            content: Text(message),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('확인'),
+              ),
+            ],
+          ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _sharedIntentHandler.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+      home: StreamBuilder<User?>(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          }
+
+          return snapshot.hasData
+              ? MainScreen(
+                user: snapshot.data!,
+                sharingType: _sharingType,
+                sharedFiles: _sharedFiles,
+                sharedText: _sharedText,
+              )
+              : const LoginScreen();
+        },
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
