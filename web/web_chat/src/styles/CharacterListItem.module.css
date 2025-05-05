@@ -1,0 +1,39 @@
+.item {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  margin-bottom: 20px;
+  padding: 12px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  transition: background 0.2s;
+  animation: fadeInUp 0.5s;
+}
+.item:hover {
+  background: #f0f4ff;
+}
+.avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  margin-right: 16px;
+  border: 2px solid #7dafff;
+  transition: transform 0.2s;
+}
+.item:hover .avatar {
+  transform: scale(1.08) rotate(-5deg);
+}
+.desc {
+  font-weight: bold;
+  font-size: 1.1em;
+}
+.sub {
+  color: #888;
+  font-size: 0.95em;
+  margin-top: 2px;
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px);}
+  to { opacity: 1; transform: translateY(0);}
+} 

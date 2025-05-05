@@ -1,0 +1,110 @@
+.root {
+  max-width: 400px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background: #f7f7fa;
+  display: flex;
+  flex-direction: column;
+}
+.header {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid #eee;
+  background: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.backBtn {
+  background: none;
+  border: none;
+  font-size: 1.5em;
+  cursor: pointer;
+  margin-right: 8px;
+}
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  margin-right: 12px;
+  border: 2px solid #7dafff;
+}
+.title {
+  font-weight: bold;
+  font-size: 1.1em;
+}
+.messages {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #f7f7fa;
+}
+.bubbleMe {
+  align-self: flex-end;
+  background: #7dafff;
+  color: #fff;
+  border-bottom-right-radius: 4px;
+  max-width: 70%;
+  padding: 10px 16px;
+  border-radius: 18px;
+  font-size: 1em;
+  animation: fadeInBubble 0.3s;
+  word-break: break-word;
+}
+.bubbleOther {
+  align-self: flex-start;
+  background: #e5e5e5;
+  color: #333;
+  border-bottom-left-radius: 4px;
+  max-width: 70%;
+  padding: 10px 16px;
+  border-radius: 18px;
+  font-size: 1em;
+  animation: fadeInBubble 0.3s;
+  word-break: break-word;
+}
+@keyframes fadeInBubble {
+  from { opacity: 0; transform: translateY(20px);}
+  to { opacity: 1; transform: translateY(0);}
+}
+.inputbar {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  border-top: 1px solid #eee;
+  background: #fff;
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+}
+.inputbar input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 1em;
+  padding: 8px;
+  border-radius: 8px;
+  background: #f0f0f0;
+  margin-right: 8px;
+  transition: box-shadow 0.2s;
+}
+.inputbar input:focus {
+  box-shadow: 0 0 0 2px #7dafff33;
+}
+.sendBtn {
+  background: #7dafff;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.sendBtn:hover {
+  background: #4e8cff;
+} 

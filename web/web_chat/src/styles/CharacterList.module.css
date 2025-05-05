@@ -1,0 +1,37 @@
+.appbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 8px 10px 8px;
+  background: #fff;
+  border-bottom: 1px solid #eee;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+.title {
+  font-size: 1.4em;
+  font-weight: bold;
+  font-family: 'Pretendard', 'Noto Sans KR', Arial, sans-serif;
+}
+.settingsBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  color: #222;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+.settingsBtn:hover {
+  opacity: 1;
+}
+.selectTitle {
+  margin: 32px 0 24px 0;
+  font-size: 1.1em;
+  font-weight: bold;
+  font-family: 'Pretendard', 'Noto Sans KR', Arial, sans-serif;
+}
+.list {
+  width: 100%;
+} 
