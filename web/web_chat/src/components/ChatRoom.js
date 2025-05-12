@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from "react";
 import styles from "../styles/ChatRoom.module.css";
-import { fetchGeminiReply } from "../api/gemini";
+import { fetchGeminiReply, initializeChatSession, clearChatSession, getConversationHistory } from "../api/gemini";
 import ScenarioSelector from "./ScenarioSelector";
 
 function ChatRoom({ character, onBack }) {
@@ -13,14 +13,14 @@ function ChatRoom({ character, onBack }) {
 
   const removeMarkdown = (text) => {
     return text
-      .replace(/\*\*(.*?)\*\*/g, '$1')
-      .replace(/\*(.*?)\*/g, '$1')
-      .replace(/_(.*?)_/g, '$1')
-      .replace(/`(.*?)`/g, '$1')
-      .replace(/\[(.*?)\]\((.*?)\)/g, '$1')
-      .replace(/\n/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
+        .replace(/\*\*(.*?)\*\*/g, '$1')
+        .replace(/\*(.*?)\*/g, '$1')
+        .replace(/_(.*?)_/g, '$1')
+        .replace(/`(.*?)`/g, '$1')
+        .replace(/\[(.*?)\]\((.*?)\)/g, '$1')
+        .replace(/\n/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
   };
 
   useEffect(() => {
@@ -31,6 +31,43 @@ function ChatRoom({ character, onBack }) {
     inputRef.current?.focus();
   }, []);
 
+  // 시나리오 선택 시 채팅 세션 초기화
+  useEffect(() => {
+    if (selectedScenario) {
+      initializeChatSession(character.id, selectedScenario.prompt)
+        .catch(err => {
+          console.error("Failed to initialize chat session:", err);
+          setMessages(msgs => [...msgs, { 
+            from: "other", 
+            text: "채팅 세션을 시작하지 못했어요. 다시 시도해주세요." 
+          }]);
+        });
+    }
+  }, [selectedScenario, character.id]);
+
+  // 컴포넌트 언마운트 시 세션 정리
+  useEffect(() => {
+    return () => {
+      if (character.id) {
+        clearChatSession(character.id);
+      }
+    };
+  }, [character.id]);
+
+  // 대화 히스토리 로드
+  useEffect(() => {
+    if (selectedScenario) {
+      const history = getConversationHistory(character.id);
+      if (history.length > 0) {
+        const formattedMessages = history.map(msg => ({
+          from: msg.role === "user" ? "me" : "other",
+          text: msg.content
+        }));
+        setMessages(formattedMessages);
+      }
+    }
+  }, [selectedScenario, character.id]);
+
   const handleSend = async () => {
     if (!input.trim() || loading) return;
 
@@ -40,13 +77,13 @@ function ChatRoom({ character, onBack }) {
     setLoading(true);
 
     try {
-      const prompt = `${selectedScenario.prompt}\n\nUser: ${userMessage}`;
-      const geminiResponse = await fetchGeminiReply(prompt);
-      const responseText = geminiResponse.candidates[0].content.parts[0].text;
+      const geminiResponse = await fetchGeminiReply(userMessage, character.id);
+      const responseText = await geminiResponse.text();
       const cleanResponse = removeMarkdown(responseText);
+
       setMessages(msgs => [...msgs, { from: "other", text: cleanResponse }]);
     } catch (err) {
-      console.error('Error:', err);
+      console.error("Error:", err);
       setMessages(msgs => [...msgs, { from: "other", text: "응답을 불러오지 못했어요 😥" }]);
     } finally {
       setLoading(false);
@@ -90,9 +127,9 @@ function ChatRoom({ character, onBack }) {
           placeholder="대화를 시작하세요."
           disabled={loading}
         />
-        <button 
-          onClick={handleSend} 
-          className={styles.sendBtn} 
+        <button
+          onClick={handleSend}
+          className={styles.sendBtn}
           disabled={loading || !input.trim()}
         >
           전송
