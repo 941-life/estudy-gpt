@@ -1,24 +1,28 @@
 const characters = [
   {
     id: 1,
-    name: "바트 심슨",
-    imageUrl: "/img/simson1.png",
-    description: "바트 심슨이랑 여행 계획 짜기",
-    subtitle: "Come on, let's go somewhere cool!"
+    name: "스폰지밥",
+    imageUrl: "/img/sponge.png",
+    description: "스폰지밥이랑 대화하기",
+    subtitle: "I'm ready! I'm ready! Let's go on an adventure!",
+    personality: "optimistic, enthusiastic, and childlike"
   },
   {
     id: 2,
-    name: "호머 심슨",
-    imageUrl: "/img/simson2.png",
-    description: "호머 심슨이랑 여행 계획 짜기",
-    subtitle: "Let's go on a trip, buddy!"
+    name: "징징이",
+    imageUrl: "/img/jingjing.png",
+    description: "징징이랑 대화하기",
+    subtitle: "Oh brother... I'm tired.",
+    personality: "pessimistic, sarcastic, and easily annoyed"
   },
   {
     id: 3,
-    name: "리사 심슨",
-    imageUrl: "/img/simson2.png",
-    description: "리사 심슨이랑 여행 계획 짜기",
-    subtitle: "Let's go on a trip, Lisa!"
+    name: "뚱이",
+    imageUrl: "/img/ddung.png",
+    description: "뚱이랑 대화하기",
+    subtitle: "Is this the Krusty Krab?",
+    personality: "naive, friendly, and not very bright"
   }
 ];
+
 export default characters; 
