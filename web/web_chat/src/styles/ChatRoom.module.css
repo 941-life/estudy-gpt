@@ -15,6 +15,7 @@
   position: sticky;
   top: 0;
   z-index: 10;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
 }
 .backBtn {
   background: none;
@@ -22,13 +23,18 @@
   font-size: 1.5em;
   cursor: pointer;
   margin-right: 8px;
+  padding: 4px 8px;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+.backBtn:hover {
+  background-color: #f0f0f0;
 }
 .avatar {
   width: 36px;
   height: 36px;
   border-radius: 50%;
   margin-right: 12px;
-  border: 2px solid #7dafff;
 }
 .title {
   font-weight: bold;
@@ -54,10 +60,11 @@
   font-size: 1em;
   animation: fadeInBubble 0.3s;
   word-break: break-word;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 .bubbleOther {
   align-self: flex-start;
-  background: #e5e5e5;
+  background: #fff;
   color: #333;
   border-bottom-left-radius: 4px;
   max-width: 70%;
@@ -66,6 +73,7 @@
   font-size: 1em;
   animation: fadeInBubble 0.3s;
   word-break: break-word;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 @keyframes fadeInBubble {
   from { opacity: 0; transform: translateY(20px);}
@@ -80,31 +88,43 @@
   position: sticky;
   bottom: 0;
   z-index: 10;
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.03);
 }
 .inputbar input {
   flex: 1;
   border: none;
   outline: none;
   font-size: 1em;
-  padding: 8px;
-  border-radius: 8px;
+  padding: 12px;
+  border-radius: 24px;
   background: #f0f0f0;
   margin-right: 8px;
-  transition: box-shadow 0.2s;
+  transition: all 0.2s;
 }
 .inputbar input:focus {
   box-shadow: 0 0 0 2px #7dafff33;
+  background: #fff;
+}
+.inputbar input::placeholder {
+  color: #999;
 }
 .sendBtn {
   background: #7dafff;
   color: #fff;
   border: none;
-  border-radius: 8px;
-  padding: 8px 16px;
+  border-radius: 24px;
+  padding: 12px 20px;
   font-size: 1em;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s;
+  font-weight: 500;
 }
-.sendBtn:hover {
+.sendBtn:hover:not(:disabled) {
   background: #4e8cff;
+  transform: translateY(-1px);
+}
+.sendBtn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  opacity: 0.7;
 } 
