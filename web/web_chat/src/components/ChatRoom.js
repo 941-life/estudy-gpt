@@ -15,16 +15,20 @@ function ChatRoom({ character, onBack }) {
   const [showAnalysis, setShowAnalysis] = useState(false);
   const [analysis, setAnalysis] = useState(null);
   const [isAuthReady, setIsAuthReady] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
   const chatEndRef = useRef(null);
   const inputRef = useRef(null);
 
   useEffect(() => {
     const initAuth = async () => {
+      setIsInitializing(true);
       try {
         await initializeAuth();
         setIsAuthReady(true);
       } catch (error) {
         console.error('인증 초기화 중 오류:', error);
+      } finally {
+        setIsInitializing(false);
       }
     };
     initAuth();
@@ -47,8 +51,10 @@ function ChatRoom({ character, onBack }) {
   }, [messages]);
 
   useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
+    if (!loading && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [loading, messages]);
 
   useEffect(() => {
     if (selectedScenario) {
@@ -138,20 +144,16 @@ function ChatRoom({ character, onBack }) {
       timestamp: new Date()
     };
 
-    const updatedMessages = [...messages, newMessage];
-    setMessages(updatedMessages);
+    setMessages(prev => [...prev, newMessage]);
     setInput("");
+    setLoading(true);
 
     try {
       if (!chatId) {
         const newChatId = await saveChat(message, character.id);
         setChatId(newChatId);
       }
-    } catch (error) {
-      console.error('채팅 저장 중 오류:', error);
-    }
 
-    try {
       const response = await fetchGeminiReply(message, character.id);
       const responseText = await response.text();
       const cleanResponse = removeMarkdown(responseText);
@@ -169,6 +171,8 @@ function ChatRoom({ character, onBack }) {
         content: '죄송합니다. 응답을 생성하는 중에 오류가 발생했습니다.',
         timestamp: new Date()
       }]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -211,10 +215,10 @@ function ChatRoom({ character, onBack }) {
     }
   };
 
-  if (!isAuthReady) {
+  if (isInitializing) {
     return (
-      <div className={styles.root}>
-        <div className={styles.loading}>인증 중...</div>
+      <div className={styles.loadingContainer}>
+        <div className={styles.loadingSpinner} />
       </div>
     );
   }
@@ -243,7 +247,15 @@ function ChatRoom({ character, onBack }) {
             {msg.content}
           </div>
         ))}
-        {loading && <div className={styles.bubbleOther}>응답 중...</div>}
+        {loading && (
+          <div className={styles.bubbleOther}>
+            <div className={styles.typingIndicator}>
+              <div className={styles.typingDot} />
+              <div className={styles.typingDot} />
+              <div className={styles.typingDot} />
+            </div>
+          </div>
+        )}
         <div ref={chatEndRef} />
       </div>
       <div className={styles.inputbar}>
@@ -256,6 +268,7 @@ function ChatRoom({ character, onBack }) {
           onKeyDown={handleKeyPress}
           placeholder="대화를 시작하세요."
           disabled={loading}
+          autoComplete="off"
         />
         <button
           onClick={() => handleSendMessage(input)}
