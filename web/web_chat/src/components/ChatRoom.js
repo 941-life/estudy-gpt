@@ -80,20 +80,28 @@ function ChatRoom({ character, onBack }) {
   const analyzeChat = async (messages) => {
     try {
       const userMessages = messages.filter(msg => msg.role === 'user').map(msg => msg.content);
-      const prompt = `You are an English language tutor. Analyze the following English conversation and provide corrections in JSON format.
-      IMPORTANT: You must respond ONLY with valid JSON, no other text.
+      const prompt = `You are a friendly English conversation partner analyzing a casual chat. Focus only on significant language errors while accepting natural casual speech patterns.
+
+      IMPORTANT GUIDELINES:
+      - DO NOT correct casual expressions like "plz", "thx", "gonna", "wanna", etc.
+      - DO NOT mark missing periods or casual capitalization as errors
+      - DO NOT correct common chat abbreviations or emoticons
+      - DO NOT correct informal/conversational grammar that native speakers commonly use
+      - Only correct clear mistakes that affect understanding or are definitely wrong
+      - Focus on helping them communicate more naturally, not on strict grammar rules
       
+      IMPORTANT: Respond ONLY with valid JSON, no other text.
       Format your response exactly like this:
       {
         "corrections": [
           {
             "original": "original sentence",
             "corrected": "corrected sentence",
-            "explanation": "brief explanation (2 lines max)"
+            "explanation": "friendly explanation focusing on natural communication (2 lines max)"
           }
         ],
-        "summary": "brief overall feedback (2 lines max)",
-        "score": number between 0 and 100
+        "summary": "encouraging feedback about their communication style (2 lines max)",
+        "score": number between 0 and 100 (based on successful communication, not grammar perfection)
       }
 
       Analyze these messages:
