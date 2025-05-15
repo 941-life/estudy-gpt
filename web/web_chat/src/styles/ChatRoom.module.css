@@ -39,6 +39,7 @@
 .title {
   font-weight: bold;
   font-size: 1.1em;
+  flex-grow: 1;
 }
 .messages {
   flex: 1;
@@ -127,4 +128,91 @@
   background: #ccc;
   cursor: not-allowed;
   opacity: 0.7;
+}
+.completeBtn {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.9em;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.completeBtn:hover:not(:disabled) {
+  background-color: #45a049;
+  transform: translateY(-1px);
+}
+.completeBtn:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+.completing {
+  background-color: #45a049;
+  animation: pulse 1.5s infinite;
+}
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+.correctionsContainer {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 16px;
+  background: #f7f7fa;
+}
+.correctionItem {
+  background-color: white;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  animation: slideIn 0.3s ease-out;
+}
+@keyframes slideIn {
+  from { 
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.originalText, .correctedText {
+  margin-bottom: 12px;
+  line-height: 1.5;
+  padding: 8px;
+  border-radius: 8px;
+}
+.originalText {
+  background-color: #f8f9fa;
+}
+.correctedText {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+.label {
+  font-weight: 600;
+  color: #666;
+  margin-right: 8px;
+  display: inline-block;
+  margin-bottom: 4px;
+}
+.noCorrections {
+  text-align: center;
+  padding: 32px 16px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  margin: 16px;
+}
+.noCorrections p {
+  font-size: 1.1em;
+  color: #4CAF50;
+  margin: 0;
 } 

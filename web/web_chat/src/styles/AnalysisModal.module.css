@@ -1,0 +1,147 @@
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.header h2 {
+  margin: 0;
+  color: #333;
+  font-size: 1.5rem;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #666;
+  padding: 0;
+  line-height: 1;
+}
+
+.closeButton:hover {
+  color: #333;
+}
+
+.scoreSection {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.scoreCircle {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: #f0f7ff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border: 3px solid #4a90e2;
+}
+
+.score {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #4a90e2;
+}
+
+.scoreLabel {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.summarySection {
+  background: #f8f9fa;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+}
+
+.summarySection h3 {
+  margin: 0 0 8px 0;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.summarySection p {
+  margin: 0;
+  color: #555;
+  line-height: 1.5;
+}
+
+.correctionsSection {
+  margin-bottom: 24px;
+}
+
+.correctionsSection h3 {
+  margin: 0 0 16px 0;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.correctionItem {
+  background: #fff;
+  border: 1px solid #e1e4e8;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.correctionItem:last-child {
+  margin-bottom: 0;
+}
+
+.label {
+  display: block;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 4px;
+  font-size: 0.9rem;
+}
+
+.original, .corrected, .explanation {
+  margin-bottom: 12px;
+}
+
+.original p, .corrected p, .explanation p {
+  margin: 0;
+  line-height: 1.5;
+  color: #333;
+}
+
+.corrected {
+  color: #2e7d32;
+}
+
+.explanation {
+  color: #666;
+  font-size: 0.95rem;
+} 

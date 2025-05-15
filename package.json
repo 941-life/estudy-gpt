@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@firebase/firestore": "^4.7.12",
+    "firebase": "^9.23.0"
+  }
+}
