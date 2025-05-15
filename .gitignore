@@ -57,3 +57,8 @@ google-services.json
 firebase_options.dart
 keys.dart
 secrets.dart
+
+assets/config/.env
+.env
+
+/services/gemini_service.dart

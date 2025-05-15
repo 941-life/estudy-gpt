@@ -3,31 +3,43 @@ import 'package:calendar_view/calendar_view.dart';
 import 'package:estudy_gpt/models/calendar_event.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:permission_handler/permission_handler.dart';
+// import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'screens/login_screen.dart';
 import 'screens/main_screen.dart';
 import 'utils/shared_intent_handler.dart';
+import "dart:io";
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(
-    CalendarControllerProvider(
-      controller: EventController(),
-      child: const MyApp(),
-    ),
-  );
+  runApp(const MyApp());
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'eStudy GPT',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: CalendarControllerProvider(
+        controller: EventController(),
+        child: const AppContent(),
+      ),
+    );
+  }
 }
 
-class _MyAppState extends State<MyApp> {
+class AppContent extends StatefulWidget {
+  const AppContent({super.key});
+
+  @override
+  State<AppContent> createState() => _AppContentState();
+}
+
+class _AppContentState extends State<AppContent> {
   String _sharingType = 'none';
   List<SharedMediaFile> _sharedFiles = [];
   String _sharedText = '';
@@ -49,16 +61,13 @@ class _MyAppState extends State<MyApp> {
   Future<void> _initializeApp() async {
     await _initWidget();
     _initSharing();
-    _addTestData(); // ✅ 테스트 데이터 추가
+    _addTestData();
   }
 
   Future<void> _initWidget() async {
     try {
-      final hasPermission = await requestStoragePermission();
-      if (hasPermission && mounted) {
-        await Event.updateCalendarWidget(events);
-        debugPrint('위젯 업데이트 성공: ${events.length}개 이벤트');
-      }
+      await Event.updateCalendarWidget(events);
+      debugPrint('위젯 업데이트 성공: ${events.length}개 이벤트');
     } catch (e) {
       _showErrorDialog('위젯 초기화 실패', e.toString());
     }
@@ -95,19 +104,6 @@ class _MyAppState extends State<MyApp> {
     _sharedIntentHandler.init();
   }
 
-  Future<bool> requestStoragePermission() async {
-    try {
-      final status = await Permission.storage.request();
-      if (!status.isGranted && mounted) {
-        _showErrorDialog('권한 필요', '공유 파일 저장을 위해 저장소 접근 권한이 필요합니다.');
-      }
-      return status.isGranted;
-    } catch (e) {
-      _showErrorDialog('권한 오류', e.toString());
-      return false;
-    }
-  }
-
   void _showErrorDialog(String title, String message) {
     showDialog(
       context: context,
@@ -133,26 +129,24 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: StreamBuilder<User?>(
-        stream: FirebaseAuth.instance.authStateChanges(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
-            );
-          }
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
 
-          return snapshot.hasData
-              ? MainScreen(
-                user: snapshot.data!,
-                sharingType: _sharingType,
-                sharedFiles: _sharedFiles,
-                sharedText: _sharedText,
-              )
-              : const LoginScreen();
-        },
-      ),
+        return snapshot.hasData
+            ? MainScreen(
+              user: snapshot.data!,
+              sharingType: _sharingType,
+              sharedFiles: _sharedFiles,
+              sharedText: _sharedText,
+            )
+            : const LoginScreen();
+      },
     );
   }
 }

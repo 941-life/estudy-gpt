@@ -10,7 +10,7 @@ class LoginScreen extends StatelessWidget {
   Future<void> _handleGoogleSignIn(BuildContext context) async {
     try {
       final googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null) return;
+      if (googleUser == null) return; // 사용자가 로그인 취소
 
       final googleAuth = await googleUser.authentication;
       final credential = GoogleAuthProvider.credential(
@@ -18,7 +18,7 @@ class LoginScreen extends StatelessWidget {
         idToken: googleAuth.idToken,
       );
 
-      // 로그인
+      // Firebase 인증
       final userCredential = await FirebaseAuth.instance.signInWithCredential(
         credential,
       );
@@ -46,18 +46,23 @@ class LoginScreen extends StatelessWidget {
         await dbRef.update(updates);
       }
 
-      // 네비게이션
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(
-          builder: (context) => MainScreen(user: userCredential.user!),
-        ),
-        (route) => false,
-      );
+      // 네비게이션 (mounted 확인)
+      if (context.mounted) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MainScreen(user: userCredential.user!),
+          ),
+          (route) => false,
+        );
+      }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('로그인 실패: $e')));
+      // 에러 메시지 표시 (mounted 확인)
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('로그인 실패: $e')));
+      }
     }
   }
 
