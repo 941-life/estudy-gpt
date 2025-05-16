@@ -20,6 +20,7 @@ dependencies:
   flutter_html: ^3.0.0
   flutter_langdetect: ^0.0.2
   flutter_markdown: ^0.7.7+1
+  flutter_pdfview: ^1.4.0+1
   google_generative_ai: 0.4.7
   google_sign_in: ^6.3.0
   home_widget: ^0.7.0+1
@@ -32,7 +33,9 @@ dependencies:
     git:
       url: https://github.com/KasemJaffer/receive_sharing_intent
       ref: 2cea396843cd3ab1b5ec4334be4233864637874e
+  share_plus: ^11.0.0
   shared_preferences: ^2.5.3
+  syncfusion_flutter_pdf: ^29.2.4
   webview_flutter: ^4.10.0
 
 dev_dependencies:

@@ -1,788 +1,4 @@
-// import 'package:flutter/material.dart';
-// import 'package:estudy_gpt/models/shared_data.dart';
-// import 'package:intl/intl.dart';
-// import 'package:receive_sharing_intent/receive_sharing_intent.dart';
-// import 'package:estudy_gpt/utils/local_storage.dart';
-// import 'package:estudy_gpt/services/gemini_service.dart';
-
-// class PersonalScreen extends StatefulWidget {
-//   final String sharingType;
-//   final List<SharedMediaFile> sharedFiles;
-//   final String sharedText;
-
-//   const PersonalScreen({
-//     super.key,
-//     required this.sharingType,
-//     required this.sharedFiles,
-//     required this.sharedText,
-//   });
-
-//   @override
-//   State<PersonalScreen> createState() => _PersonalScreenState();
-// }
-
-// class _PersonalScreenState extends State<PersonalScreen> {
-//   final GeminiService _geminiService = GeminiService();
-//   List<SharedData> _history = [];
-//   bool _showHistory = false;
-//   List<Map<String, String>> _chatMessages = [];
-
-//   Future<void> _loadHistory() async {
-//     final history = await LocalStorage.loadData();
-//     setState(() {
-//       _history = history.reversed.toList();
-//       _showHistory = true;
-//     });
-//   }
-
-//   Future<void> _sendMessageToGemini(String message) async {
-//     setState(() {
-//       _chatMessages.add({'sender': 'user', 'message': message});
-//     });
-
-//     try {
-//       final reply = await _geminiService.ask(message);
-//       setState(() {
-//         _chatMessages.add({'sender': 'gemini', 'message': reply});
-//       });
-//     } catch (e) {
-//       setState(() {
-//         _chatMessages.add({'sender': 'gemini', 'message': '오류 발생: $e'});
-//       });
-//     }
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return _showHistory ? _buildHistoryScreen() : _buildMainScreen();
-//   }
-
-//   Widget _buildMainScreen() {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: const Text('개인 화면'),
-//         actions: [
-//           IconButton(
-//             icon: const Icon(Icons.history),
-//             onPressed: _loadHistory,
-//             tooltip: '히스토리 보기',
-//           ),
-//         ],
-//       ),
-//       body: _buildCurrentContent(),
-//     );
-//   }
-
-//   Widget _buildHistoryScreen() {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: const Text('공유 기록'),
-//         leading: IconButton(
-//           icon: const Icon(Icons.arrow_back),
-//           onPressed: () => setState(() => _showHistory = false),
-//         ),
-//       ),
-//       body: ListView.builder(
-//         itemCount: _history.length,
-//         itemBuilder: (ctx, index) => _buildHistoryItem(_history[index]),
-//       ),
-//     );
-//   }
-
-//   Widget _buildCurrentContent() {
-//     if (widget.sharingType == 'text' && widget.sharedText.isNotEmpty) {
-//       return Column(
-//         children: [
-//           Expanded(
-//             child: ListView.builder(
-//               itemCount: _chatMessages.length,
-//               itemBuilder: (ctx, index) {
-//                 final message = _chatMessages[index];
-//                 final isUser = message['sender'] == 'user';
-//                 return Align(
-//                   alignment:
-//                       isUser ? Alignment.centerRight : Alignment.centerLeft,
-//                   child: Container(
-//                     margin: const EdgeInsets.symmetric(
-//                       vertical: 5,
-//                       horizontal: 10,
-//                     ),
-//                     padding: const EdgeInsets.all(10),
-//                     decoration: BoxDecoration(
-//                       color: isUser ? Colors.blue : Colors.grey[300],
-//                       borderRadius: BorderRadius.circular(10),
-//                     ),
-//                     child: Text(
-//                       message['message']!,
-//                       style: TextStyle(
-//                         color: isUser ? Colors.white : Colors.black,
-//                       ),
-//                     ),
-//                   ),
-//                 );
-//               },
-//             ),
-//           ),
-//           Padding(
-//             padding: const EdgeInsets.all(8.0),
-//             child: Row(
-//               children: [
-//                 Expanded(
-//                   child: TextField(
-//                     controller: TextEditingController(text: widget.sharedText),
-//                     onSubmitted: (value) {
-//                       if (value.isNotEmpty) {
-//                         _sendMessageToGemini(value);
-//                       }
-//                     },
-//                     decoration: const InputDecoration(
-//                       hintText: '메시지를 입력하세요...',
-//                       border: OutlineInputBorder(),
-//                     ),
-//                   ),
-//                 ),
-//                 IconButton(
-//                   icon: const Icon(Icons.send),
-//                   onPressed: () {
-//                     if (widget.sharedText.isNotEmpty) {
-//                       _sendMessageToGemini(widget.sharedText);
-//                     }
-//                   },
-//                 ),
-//               ],
-//             ),
-//           ),
-//         ],
-//       );
-//     }
-
-//     if ((widget.sharingType == 'file' ||
-//             widget.sharingType == 'media_stream' ||
-//             widget.sharingType == 'initial_media') &&
-//         widget.sharedFiles.isNotEmpty) {
-//       return ListView.builder(
-//         itemCount: widget.sharedFiles.length,
-//         itemBuilder:
-//             (ctx, i) => ListTile(title: Text(widget.sharedFiles[i].path)),
-//       );
-//     }
-
-//     return const Center(
-//       child: Text(
-//         '공유된 내용이 없습니다',
-//         style: TextStyle(fontSize: 18, color: Colors.grey),
-//       ),
-//     );
-//   }
-
-//   Widget _buildHistoryItem(SharedData data) {
-//     return ListTile(
-//       leading: Icon(
-//         data.type == 'text' ? Icons.text_snippet : Icons.file_copy,
-//         color: Colors.blue,
-//       ),
-//       title: Text(
-//         _getPreview(data),
-//         style: const TextStyle(fontWeight: FontWeight.w500),
-//       ),
-//       subtitle: Text(
-//         DateFormat('yyyy-MM-dd HH:mm').format(data.timestamp),
-//         style: const TextStyle(color: Colors.grey),
-//       ),
-//       onTap: () => _showDetailDialog(context, data),
-//       trailing: IconButton(
-//         icon: const Icon(Icons.delete, color: Colors.red),
-//         onPressed: () => _deleteItem(data),
-//       ),
-//     );
-//   }
-
-//   String _getPreview(SharedData data) {
-//     if (data.type == 'text') {
-//       return data.text.isNotEmpty
-//           ? (data.text.length > 20
-//               ? '${data.text.substring(0, 20)}...'
-//               : data.text)
-//           : '텍스트 없음';
-//     } else {
-//       return data.filePaths.isNotEmpty
-//           ? '${data.filePaths.length}개의 파일'
-//           : '파일 없음';
-//     }
-//   }
-
-//   void _showDetailDialog(BuildContext context, SharedData data) {
-//     showDialog(
-//       context: context,
-//       builder:
-//           (_) => AlertDialog(
-//             title: const Text('상세 정보'),
-//             content: ConstrainedBox(
-//               constraints: const BoxConstraints(maxWidth: 300, maxHeight: 400),
-//               child:
-//                   data.type == 'text'
-//                       ? SingleChildScrollView(child: Text(data.text))
-//                       : ListView(
-//                         shrinkWrap: true,
-//                         children:
-//                             data.filePaths
-//                                 .map(
-//                                   (path) => Padding(
-//                                     padding: const EdgeInsets.symmetric(
-//                                       vertical: 4,
-//                                     ),
-//                                     child: Text(
-//                                       '• ${path.split('/').last}',
-//                                       style: const TextStyle(fontSize: 16),
-//                                     ),
-//                                   ),
-//                                 )
-//                                 .toList(),
-//                       ),
-//             ),
-//             actions: [
-//               TextButton(
-//                 onPressed: () => Navigator.pop(context),
-//                 child: const Text('닫기'),
-//               ),
-//             ],
-//           ),
-//     );
-//   }
-
-//   Future<void> _deleteItem(SharedData data) async {
-//     final confirm = await showDialog<bool>(
-//       context: context,
-//       builder:
-//           (_) => AlertDialog(
-//             title: const Text('삭제 확인'),
-//             content: const Text('이 항목을 정말 삭제하시겠습니까?'),
-//             actions: [
-//               TextButton(
-//                 onPressed: () => Navigator.pop(context, false),
-//                 child: const Text('취소'),
-//               ),
-//               TextButton(
-//                 onPressed: () => Navigator.pop(context, true),
-//                 child: const Text('삭제'),
-//               ),
-//             ],
-//           ),
-//     );
-
-//     if (confirm ?? false) {
-//       final newHistory = _history.where((item) => item != data).toList();
-//       await LocalStorage.saveAllData(newHistory);
-//       setState(() => _history = newHistory);
-//     }
-//   }
-// }
-
-// import 'package:flutter/material.dart';
-// import 'package:estudy_gpt/models/shared_data.dart';
-// import 'package:intl/intl.dart';
-// import 'package:receive_sharing_intent/receive_sharing_intent.dart';
-// import 'package:estudy_gpt/utils/local_storage.dart';
-// import 'package:estudy_gpt/services/gemini_service.dart';
-
-// class PersonalScreen extends StatefulWidget {
-//   final String sharingType;
-//   final List<SharedMediaFile> sharedFiles;
-//   final String sharedText;
-
-//   const PersonalScreen({
-//     super.key,
-//     required this.sharingType,
-//     required this.sharedFiles,
-//     required this.sharedText,
-//   });
-
-//   @override
-//   State<PersonalScreen> createState() => _PersonalScreenState();
-// }
-
-// enum TextOption { summary, keywords, translate, other }
-
-// class _PersonalScreenState extends State<PersonalScreen> {
-//   final GeminiService _geminiService = GeminiService();
-//   List<SharedData> _history = [];
-//   bool _showHistory = false;
-//   bool _isLoading = false;
-//   String? _result;
-//   TextOption? _selectedOption;
-//   final TextEditingController _otherController = TextEditingController();
-//   String _detectedLang = 'en'; // default
-
-//   // 언어 감지: 한글이 30% 이상이면 한국어, 아니면 영어
-//   String _detectLang(String text) {
-//     final korean = RegExp(r'[ㄱ-ㅎㅏ-ㅣ가-힣]');
-//     int koCount = korean.allMatches(text).length;
-//     int total = text.replaceAll(RegExp(r'\s'), '').length;
-//     if (total == 0) return 'en';
-//     double ratio = koCount / total;
-//     return ratio > 0.3 ? 'ko' : 'en';
-//   }
-
-//   // 옵션 라벨
-//   Map<String, Map<TextOption, String>> optionLabels = {
-//     'en': {
-//       TextOption.summary: 'Summarize',
-//       TextOption.keywords: 'Extract Keywords',
-//       TextOption.translate: 'Translate to Korean',
-//       TextOption.other: 'Other',
-//     },
-//     'ko': {
-//       TextOption.summary: '요약해줘',
-//       TextOption.keywords: '키워드 추출',
-//       TextOption.translate: '영어로 번역',
-//       TextOption.other: '기타',
-//     },
-//   };
-
-//   // 안내문구
-//   Map<String, String> instructionText = {
-//     'en': 'Choose what you want to do with the text.',
-//     'ko': '원하는 작업을 선택하세요.',
-//   };
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     if (widget.sharingType == 'text' && widget.sharedText.isNotEmpty) {
-//       _detectedLang = _detectLang(widget.sharedText);
-//     }
-//   }
-
-//   Future<void> _loadHistory() async {
-//     final history = await LocalStorage.loadData();
-//     setState(() {
-//       _history = history.reversed.toList();
-//       _showHistory = true;
-//     });
-//   }
-
-//   Future<void> _handleOptionSubmit() async {
-//     setState(() {
-//       _isLoading = true;
-//       _result = null;
-//     });
-
-//     String prompt = '';
-//     String text = widget.sharedText;
-//     String lang = _detectedLang;
-
-//     switch (_selectedOption) {
-//       case TextOption.summary:
-//         prompt =
-//             lang == 'ko'
-//                 ? '"$text" 이 텍스트를 간결하게 요약해줘.'
-//                 : 'Summarize the following text concisely: "$text"';
-//         break;
-//       case TextOption.keywords:
-//         prompt =
-//             lang == 'ko'
-//                 ? '"$text" 이 텍스트에서 주요 키워드를 뽑아줘.'
-//                 : 'Extract the main keywords from the following text: "$text"';
-//         break;
-//       case TextOption.translate:
-//         prompt =
-//             lang == 'ko'
-//                 ? '"$text" 이 텍스트를 영어로 번역해줘.'
-//                 : 'Translate the following text into Korean: "$text"';
-//         break;
-//       case TextOption.other:
-//         String otherText = _otherController.text.trim();
-//         String otherLang = _detectLang(otherText);
-//         prompt = otherText;
-//         break;
-//       default:
-//         prompt = '';
-//     }
-
-//     if (prompt.isEmpty) {
-//       setState(() {
-//         _isLoading = false;
-//         _result =
-//             lang == 'ko' ? '요청 내용을 입력해주세요.' : 'Please enter your request.';
-//       });
-//       return;
-//     }
-
-//     try {
-//       final reply = await _geminiService.ask(prompt);
-//       setState(() {
-//         _result = reply;
-//       });
-//     } catch (e) {
-//       setState(() {
-//         _result = (lang == 'ko' ? '오류 발생: ' : 'Error: ') + e.toString();
-//       });
-//     } finally {
-//       setState(() {
-//         _isLoading = false;
-//       });
-//     }
-//   }
-
-//   @override
-//   void dispose() {
-//     _otherController.dispose();
-//     super.dispose();
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return _showHistory ? _buildHistoryScreen() : _buildMainScreen();
-//   }
-
-//   Widget _buildMainScreen() {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text(_detectedLang == 'ko' ? '개인 화면' : 'Personal'),
-//         actions: [
-//           IconButton(
-//             icon: const Icon(Icons.history),
-//             onPressed: _loadHistory,
-//             tooltip: _detectedLang == 'ko' ? '히스토리 보기' : 'View History',
-//           ),
-//         ],
-//       ),
-//       body: _buildCurrentContent(),
-//       backgroundColor: Colors.grey[100],
-//     );
-//   }
-
-//   Widget _buildHistoryScreen() {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text(_detectedLang == 'ko' ? '공유 기록' : 'Shared History'),
-//         leading: IconButton(
-//           icon: const Icon(Icons.arrow_back),
-//           onPressed: () => setState(() => _showHistory = false),
-//         ),
-//       ),
-//       body: ListView.builder(
-//         itemCount: _history.length,
-//         itemBuilder: (ctx, index) => _buildHistoryItem(_history[index]),
-//       ),
-//       backgroundColor: Colors.grey[100],
-//     );
-//   }
-
-//   Widget _buildCurrentContent() {
-//     if (widget.sharingType == 'text' && widget.sharedText.isNotEmpty) {
-//       return SingleChildScrollView(
-//         padding: const EdgeInsets.all(24),
-//         child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.stretch,
-//           children: [
-//             Card(
-//               elevation: 4,
-//               shape: RoundedRectangleBorder(
-//                 borderRadius: BorderRadius.circular(18),
-//               ),
-//               color: Colors.white,
-//               child: Padding(
-//                 padding: const EdgeInsets.all(20),
-//                 child: Text(
-//                   widget.sharedText,
-//                   style: const TextStyle(
-//                     fontSize: 17,
-//                     fontWeight: FontWeight.w500,
-//                   ),
-//                 ),
-//               ),
-//             ),
-//             const SizedBox(height: 28),
-//             Text(
-//               instructionText[_detectedLang] ?? instructionText['en']!,
-//               style: TextStyle(
-//                 fontWeight: FontWeight.bold,
-//                 fontSize: 17,
-//                 color: Colors.blue[700],
-//               ),
-//             ),
-//             const SizedBox(height: 18),
-//             _buildRadioOptions(),
-//             if (_selectedOption == TextOption.other)
-//               Padding(
-//                 padding: const EdgeInsets.only(top: 10, bottom: 8),
-//                 child: TextField(
-//                   controller: _otherController,
-//                   decoration: InputDecoration(
-//                     labelText:
-//                         _detectedLang == 'ko'
-//                             ? '기타 요청사항을 입력하세요'
-//                             : 'Enter your custom request',
-//                     border: OutlineInputBorder(
-//                       borderRadius: BorderRadius.circular(14),
-//                     ),
-//                   ),
-//                   minLines: 1,
-//                   maxLines: 3,
-//                 ),
-//               ),
-//             const SizedBox(height: 24),
-//             ElevatedButton.icon(
-//               onPressed: _isLoading ? null : _handleOptionSubmit,
-//               icon: const Icon(Icons.send, size: 20),
-//               label: Text(
-//                 _detectedLang == 'ko' ? '요청하기' : 'Submit',
-//                 style: const TextStyle(
-//                   fontSize: 16,
-//                   fontWeight: FontWeight.bold,
-//                 ),
-//               ),
-//               style: ElevatedButton.styleFrom(
-//                 backgroundColor: Colors.blueAccent,
-//                 foregroundColor: Colors.white,
-//                 minimumSize: const Size.fromHeight(48),
-//                 shape: RoundedRectangleBorder(
-//                   borderRadius: BorderRadius.circular(16),
-//                 ),
-//                 elevation: 3,
-//               ),
-//             ),
-//             const SizedBox(height: 32),
-//             if (_isLoading) const Center(child: CircularProgressIndicator()),
-//             if (_result != null)
-//               Card(
-//                 color: Colors.blue[50],
-//                 margin: const EdgeInsets.only(top: 12),
-//                 shape: RoundedRectangleBorder(
-//                   borderRadius: BorderRadius.circular(14),
-//                 ),
-//                 child: Padding(
-//                   padding: const EdgeInsets.all(20),
-//                   child: Text(_result!, style: const TextStyle(fontSize: 16)),
-//                 ),
-//               ),
-//           ],
-//         ),
-//       );
-//     }
-
-//     if ((widget.sharingType == 'file' ||
-//             widget.sharingType == 'media_stream' ||
-//             widget.sharingType == 'initial_media') &&
-//         widget.sharedFiles.isNotEmpty) {
-//       return ListView.builder(
-//         padding: const EdgeInsets.all(16),
-//         itemCount: widget.sharedFiles.length,
-//         itemBuilder:
-//             (ctx, i) => Card(
-//               margin: const EdgeInsets.symmetric(vertical: 8),
-//               shape: RoundedRectangleBorder(
-//                 borderRadius: BorderRadius.circular(16),
-//               ),
-//               elevation: 2,
-//               child: ListTile(
-//                 leading: Icon(Icons.insert_drive_file, color: Colors.blue[400]),
-//                 title: Text(
-//                   widget.sharedFiles[i].path.split('/').last,
-//                   style: const TextStyle(fontWeight: FontWeight.w600),
-//                 ),
-//               ),
-//             ),
-//       );
-//     }
-
-//     return Center(
-//       child: Text(
-//         _detectedLang == 'ko' ? '공유된 내용이 없습니다' : 'No shared content found.',
-//         style: const TextStyle(fontSize: 18, color: Colors.grey),
-//       ),
-//     );
-//   }
-
-//   Widget _buildRadioOptions() {
-//     final labels = optionLabels[_detectedLang] ?? optionLabels['en']!;
-//     return Column(
-//       children: [
-//         _buildOptionTile(TextOption.summary, labels[TextOption.summary]!),
-//         const SizedBox(height: 4),
-//         _buildOptionTile(TextOption.keywords, labels[TextOption.keywords]!),
-//         const SizedBox(height: 4),
-//         _buildOptionTile(TextOption.translate, labels[TextOption.translate]!),
-//         const SizedBox(height: 4),
-//         _buildOptionTile(TextOption.other, labels[TextOption.other]!),
-//       ],
-//     );
-//   }
-
-//   Widget _buildOptionTile(TextOption option, String label) {
-//     final isSelected = _selectedOption == option;
-//     return InkWell(
-//       borderRadius: BorderRadius.circular(12),
-//       onTap:
-//           () => setState(() {
-//             _selectedOption = option;
-//             if (option != TextOption.other) _otherController.clear();
-//           }),
-//       child: AnimatedContainer(
-//         duration: const Duration(milliseconds: 200),
-//         curve: Curves.ease,
-//         decoration: BoxDecoration(
-//           color: isSelected ? Colors.blue[50] : Colors.white,
-//           borderRadius: BorderRadius.circular(12),
-//           border: Border.all(
-//             color: isSelected ? Colors.blueAccent : Colors.grey[300]!,
-//             width: isSelected ? 2 : 1,
-//           ),
-//           boxShadow: [
-//             if (isSelected)
-//               BoxShadow(
-//                 color: Colors.blueAccent.withOpacity(0.08),
-//                 blurRadius: 8,
-//                 offset: const Offset(0, 2),
-//               ),
-//           ],
-//         ),
-//         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-//         child: Row(
-//           children: [
-//             Radio<TextOption>(
-//               value: option,
-//               groupValue: _selectedOption,
-//               onChanged:
-//                   (val) => setState(() {
-//                     _selectedOption = val;
-//                     if (option != TextOption.other) _otherController.clear();
-//                   }),
-//               activeColor: Colors.blueAccent,
-//             ),
-//             const SizedBox(width: 10),
-//             Expanded(
-//               child: Text(
-//                 label,
-//                 style: TextStyle(
-//                   fontSize: 16,
-//                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-//                   color: isSelected ? Colors.blueAccent : Colors.black87,
-//                 ),
-//               ),
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-
-//   Widget _buildHistoryItem(SharedData data) {
-//     return Card(
-//       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-//       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-//       elevation: 2,
-//       child: ListTile(
-//         leading: CircleAvatar(
-//           backgroundColor: Colors.blue[100],
-//           child: Icon(
-//             data.type == 'text' ? Icons.text_snippet : Icons.file_copy,
-//             color: Colors.blueAccent,
-//           ),
-//         ),
-//         title: Text(
-//           _getPreview(data),
-//           style: const TextStyle(fontWeight: FontWeight.w600),
-//         ),
-//         subtitle: Text(
-//           DateFormat('yyyy-MM-dd HH:mm').format(data.timestamp),
-//           style: const TextStyle(color: Colors.grey),
-//         ),
-//         onTap: () => _showDetailDialog(context, data),
-//         trailing: IconButton(
-//           icon: const Icon(Icons.delete, color: Colors.redAccent),
-//           onPressed: () => _deleteItem(data),
-//         ),
-//       ),
-//     );
-//   }
-
-//   String _getPreview(SharedData data) {
-//     if (data.type == 'text') {
-//       return data.text.isNotEmpty
-//           ? (data.text.length > 20
-//               ? '${data.text.substring(0, 20)}...'
-//               : data.text)
-//           : (_detectedLang == 'ko' ? '텍스트 없음' : 'No text');
-//     } else {
-//       return data.filePaths.isNotEmpty
-//           ? '${data.filePaths.length}${_detectedLang == 'ko' ? '개의 파일' : ' files'}'
-//           : (_detectedLang == 'ko' ? '파일 없음' : 'No file');
-//     }
-//   }
-
-//   void _showDetailDialog(BuildContext context, SharedData data) {
-//     showDialog(
-//       context: context,
-//       builder:
-//           (_) => AlertDialog(
-//             title: Text(_detectedLang == 'ko' ? '상세 정보' : 'Detail'),
-//             content: ConstrainedBox(
-//               constraints: const BoxConstraints(maxWidth: 300, maxHeight: 400),
-//               child:
-//                   data.type == 'text'
-//                       ? SingleChildScrollView(child: Text(data.text))
-//                       : ListView(
-//                         shrinkWrap: true,
-//                         children:
-//                             data.filePaths
-//                                 .map(
-//                                   (path) => Padding(
-//                                     padding: const EdgeInsets.symmetric(
-//                                       vertical: 4,
-//                                     ),
-//                                     child: Text(
-//                                       '• ${path.split('/').last}',
-//                                       style: const TextStyle(fontSize: 16),
-//                                     ),
-//                                   ),
-//                                 )
-//                                 .toList(),
-//                       ),
-//             ),
-//             actions: [
-//               TextButton(
-//                 onPressed: () => Navigator.pop(context),
-//                 child: Text(_detectedLang == 'ko' ? '닫기' : 'Close'),
-//               ),
-//             ],
-//           ),
-//     );
-//   }
-
-//   Future<void> _deleteItem(SharedData data) async {
-//     final confirm = await showDialog<bool>(
-//       context: context,
-//       builder:
-//           (_) => AlertDialog(
-//             title: Text(_detectedLang == 'ko' ? '삭제 확인' : 'Delete'),
-//             content: Text(
-//               _detectedLang == 'ko'
-//                   ? '이 항목을 정말 삭제하시겠습니까?'
-//                   : 'Are you sure you want to delete this item?',
-//             ),
-//             actions: [
-//               TextButton(
-//                 onPressed: () => Navigator.pop(context, false),
-//                 child: Text(_detectedLang == 'ko' ? '취소' : 'Cancel'),
-//               ),
-//               TextButton(
-//                 onPressed: () => Navigator.pop(context, true),
-//                 child: Text(_detectedLang == 'ko' ? '삭제' : 'Delete'),
-//               ),
-//             ],
-//           ),
-//     );
-
-//     if (confirm ?? false) {
-//       final newHistory = _history.where((item) => item != data).toList();
-//       await LocalStorage.saveAllData(newHistory);
-//       setState(() => _history = newHistory);
-//     }
-//   }
-// }
-
+import 'dart:io';
 import 'package:estudy_gpt/widgets/markdown_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:estudy_gpt/models/shared_data.dart';
@@ -790,6 +6,11 @@ import 'package:intl/intl.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:estudy_gpt/utils/local_storage.dart';
 import 'package:estudy_gpt/services/gemini_service.dart';
+import 'package:path/path.dart' as path;
+import 'package:flutter_pdfview/flutter_pdfview.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:syncfusion_flutter_pdf/pdf.dart';
 import 'quiz_screen.dart';
 
 class PersonalScreen extends StatefulWidget {
@@ -808,14 +29,9 @@ class PersonalScreen extends StatefulWidget {
   State<PersonalScreen> createState() => _PersonalScreenState();
 }
 
-enum LangOption {
-  vocab, // 단어/표현 뽑기
-  correction, // 문장 교정
-  grammar, // 문법 설명
-  examples, // 예문 만들기
-  dialogue, // 회화 연습
-  other, // 기타 요청
-}
+enum LangOption { vocab, grammar, examples, dialogue, other }
+
+enum ContentType { text, document, unknown }
 
 class _PersonalScreenState extends State<PersonalScreen> {
   final GeminiService _geminiService = GeminiService();
@@ -826,9 +42,104 @@ class _PersonalScreenState extends State<PersonalScreen> {
   LangOption? _selectedOption;
   final TextEditingController _otherController = TextEditingController();
   List<Map<String, String>> _parsedVocabList = [];
-  String _detectedLang = 'en'; // default
+  String _detectedLang = 'en';
+  ContentType _contentType = ContentType.unknown;
+  String _extractedText = '';
+  String? _documentPath;
+  bool _isProcessingFile = false;
 
-  // 언어 감지: 한글이 30% 이상이면 한국어, 아니면 영어
+  @override
+  void initState() {
+    super.initState();
+    _determineContentType();
+  }
+
+  void _determineContentType() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // 텍스트 공유인 경우
+      if (widget.sharingType == 'text' && widget.sharedText.isNotEmpty) {
+        _contentType = ContentType.text;
+        _extractedText = widget.sharedText;
+        _detectedLang = _detectLang(_extractedText);
+      }
+      // 파일 공유인 경우
+      else if ((widget.sharingType == 'file' ||
+              widget.sharingType == 'media_stream' ||
+              widget.sharingType == 'initial_media') &&
+          widget.sharedFiles.isNotEmpty) {
+        final filePath = widget.sharedFiles.first.path;
+        final extension = path.extension(filePath).toLowerCase();
+
+        if (extension == '.pdf' ||
+            extension == '.txt' ||
+            extension == '.doc' ||
+            extension == '.docx') {
+          _contentType = ContentType.document;
+          _documentPath = filePath;
+
+          // 파일 내용 추출
+          await _extractDocumentContent(filePath, extension);
+        } else {
+          _contentType = ContentType.unknown;
+        }
+      }
+    } catch (e) {
+      print('Error determining content type: $e');
+      _contentType = ContentType.unknown;
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _extractDocumentContent(
+    String filePath,
+    String extension,
+  ) async {
+    setState(() {
+      _isProcessingFile = true;
+    });
+
+    try {
+      if (extension == '.txt') {
+        // TXT 파일 읽기
+        final file = File(filePath);
+        _extractedText = await file.readAsString();
+        _detectedLang = _detectLang(_extractedText);
+      } else if (extension == '.pdf') {
+        // PDF 파일 텍스트 추출
+        _documentPath = filePath;
+
+        // Syncfusion PDF 라이브러리를 사용하여 텍스트 추출
+        final bytes = await File(filePath).readAsBytes();
+        final document = PdfDocument(inputBytes: bytes);
+        final extractor = PdfTextExtractor(document);
+        _extractedText = extractor.extractText();
+        document.dispose();
+
+        _detectedLang = _detectLang(_extractedText);
+      } else {
+        // 기타 문서 형식 (doc, docx 등)
+        _documentPath = filePath;
+        _extractedText = "문서 파일에서 추출된 텍스트입니다. 실제 앱에서는 문서 텍스트 추출 라이브러리를 사용하세요.";
+        _detectedLang = 'ko'; // 기본값
+      }
+    } catch (e) {
+      print('Error extracting document content: $e');
+      _extractedText = "파일 내용을 추출하는 중 오류가 발생했습니다.";
+      _detectedLang = 'ko';
+    } finally {
+      setState(() {
+        _isProcessingFile = false;
+      });
+    }
+  }
+
   String _detectLang(String text) {
     final korean = RegExp(r'[ㄱ-ㅎㅏ-ㅣ가-힣]');
     int koCount = korean.allMatches(text).length;
@@ -838,16 +149,11 @@ class _PersonalScreenState extends State<PersonalScreen> {
     return ratio > 0.3 ? 'ko' : 'en';
   }
 
-  // 옵션 라벨 및 설명
   final Map<String, Map<LangOption, Map<String, String>>> optionLabels = {
     'en': {
       LangOption.vocab: {
         'label': 'Extract Key Vocabulary',
         'desc': 'Get important words/phrases with definitions and examples.',
-      },
-      LangOption.correction: {
-        'label': 'Correct My Sentences',
-        'desc': 'Fix grammar and make your text more natural.',
       },
       LangOption.grammar: {
         'label': 'Explain Grammar',
@@ -871,10 +177,6 @@ class _PersonalScreenState extends State<PersonalScreen> {
         'label': '주요 단어/표현 뽑기',
         'desc': '중요한 단어/표현과 뜻, 예문을 받아보세요.',
       },
-      LangOption.correction: {
-        'label': '문장 교정 및 피드백',
-        'desc': '문법, 어색한 표현을 교정하고 자연스럽게 바꿔줍니다.',
-      },
       LangOption.grammar: {
         'label': '문법 설명해줘',
         'desc': '주요 문법 포인트를 예시와 함께 설명해줍니다.',
@@ -888,50 +190,59 @@ class _PersonalScreenState extends State<PersonalScreen> {
     },
   };
 
-  // 프롬프트 템플릿
   final Map<String, Map<LangOption, String Function(String)>>
   promptTemplates = {
     'en': {
       LangOption.vocab:
           (text) =>
-              'Extract key vocabulary and expressions from the following text. Format your response as a markdown table with two columns: "Word" and "Definition & Example". In the Word column, put only the vocabulary word. In the Definition & Example column, put the definition first, then add the example sentence below in italics. Do not include any examples in the Word column. Example format:\n\n| Word | Definition & Example |\n| --- | --- |\n| example | meaning of the word\n*This is an example sentence.* |\n\nText: $text',
+              'Extract key vocabulary and expressions from the following text. Format your response as a numbered list (not a table). For each item, include: 1) the word or phrase in bold with its meaning in parentheses, 2) an example of usage in italics, and 3) a brief explanation. Example format:\n\n1. **Word** ("meaning"): *"example sentence..."* Explanation of usage and context.\n\n2. **Another word** ("meaning"): *"example sentence..."* Explanation of usage and context.\n\nText: $text',
 
-      LangOption.correction:
-          (text) =>
-              'Correct grammar, awkward expressions, and spelling in the following text, and provide improved sentences with explanations:\n$text',
       LangOption.grammar:
           (text) =>
-              'Explain the main grammar points used in the following text for a B1 learner, with examples:\n$text',
+              'Identify and explain 3-5 key grammar points used in the following text. Format your response as a numbered list. For each grammar point: 1) Name the grammar structure in bold, 2) Explain when and how to use it, 3) Show examples from the text in italics, 4) Provide 2 additional example sentences, and 5) Include common mistakes to avoid. Use clear, simple language suitable for B1 level English learners.\n\nExample format:\n\n1. **Present Perfect Continuous**\n   - **Usage**: To talk about actions that started in the past and continue until now, often emphasizing duration.\n   - **Example from text**: *"She has been studying English for three years."*\n   - **Additional examples**:\n     a) I have been waiting for you since 2 PM.\n     b) They have been working on this project all week.\n   - **Common mistakes**: Confusing it with simple present perfect; forgetting the auxiliary "been".\n\nText: $text',
+
       LangOption.examples:
           (text) =>
-              'Select important words/phrases from the following text and make new example sentences for each:\n$text',
+              'Select 5-7 important words or phrases from the following text. For each word/phrase: 1) Show the word in bold, 2) Provide its part of speech and brief definition in parentheses, 3) Include the original sentence from the text in italics, and 4) Create 3 new example sentences using the word/phrase in different contexts, ranging from simple to more complex usage. Make sure the examples are natural and useful for a B1 level English learner.\n\nExample format:\n\n1. **overcome** (verb, to succeed in dealing with a problem)\n   - *Original: "She overcame many challenges to reach her goal."*\n   - New examples:\n     a) It took me years to overcome my fear of heights.\n     b) The team had to overcome several obstacles before winning the championship.\n     c) With determination, you can overcome almost any difficulty you face in life.\n\nText: $text',
+
       LangOption.dialogue:
           (text) =>
-              'Create a short dialogue (3 question-answer pairs) at B1 level based on the following topic/text:\n$text',
+              'Create a natural, conversational dialogue based on the following text. The dialogue should:\n1) Include 3-4 question-answer pairs between two people (named A and B)\n2) Incorporate key vocabulary and themes from the text\n3) Be at B1 level (intermediate) with some challenging vocabulary but clear context\n4) Include common conversational expressions and natural responses\n5) End with a logical conclusion\n\nFormat the dialogue clearly with names and line breaks. After the dialogue, include a "Language Notes" section that explains 3-4 useful expressions or grammar points used in the dialogue.\n\nExample format:\n\nA: [First question or statement]\nB: [Response, possibly with a follow-up question]\nA: [Response to B\'s question]\n...\n\nLanguage Notes:\n1. "[expression]" - explanation and how to use it\n2. "[grammar point]" - explanation with example\n\nText: $text',
     },
+
     'ko': {
       LangOption.vocab:
           (text) =>
-              '아래 텍스트에서 주요 단어와 표현을 뽑아서 마크다운 표로 정리해줘. 표는 두 개의 열로 구성하고, 왼쪽 열에는 단어를, 오른쪽 열에는 뜻(상단)과 예문(하단, 이탤릭체)을 함께 넣어줘. 예시 형식:\n\n| 단어 | 뜻 & 예문 |\n| --- | --- |\n| 예시 | 단어의 의미\n*이것은 예문입니다.* |\n\n텍스트: $text',
-      LangOption.correction:
-          (text) =>
-              '아래 텍스트의 문법, 어색한 표현, 맞춤법을 교정하고, 더 자연스러운 문장으로 바꿔주고 설명해줘.\n$text',
+              '아래 텍스트에서 주요 단어와 표현을 뽑아서 번호가 매겨진 목록으로 정리해줘. 각 항목은 1) 단어나 표현을 굵게 표시하고 괄호 안에 의미 표시, 2) 이탤릭체로 된 예문, 3) 간단한 설명을 포함해야 함. 예시 형식:\n\n1. **단어** ("의미"): *"예문..."* 사용법과 맥락에 대한 설명.\n\n2. **다른 단어** ("의미"): *"예문..."* 사용법과 맥락에 대한 설명.\n\n텍스트: $text',
+
       LangOption.grammar:
-          (text) => '아래 텍스트에서 사용된 주요 문법 포인트를 B1 학습자 수준에서 예시와 함께 설명해줘.\n$text',
+          (text) =>
+              '아래 텍스트에서 사용된 주요 문법 포인트 3-5개를 찾아 설명해줘. 번호가 매겨진 목록 형식으로 작성하고, 각 문법 포인트마다: 1) 문법 구조 이름을 굵게 표시, 2) 언제, 어떻게 사용하는지 설명, 3) 텍스트에서 발췌한 예문을 이탤릭체로 표시, 4) 추가 예문 2개 제공, 5) 흔히 저지르는 실수 포함. B1 수준의 학습자가 이해할 수 있는 명확하고 간단한 언어로 설명해줘.\n\n예시 형식:\n\n1. **현재완료진행형**\n   - **용법**: 과거에 시작해서 현재까지 계속되는 행동을 표현할 때 사용하며, 주로 기간을 강조함.\n   - **텍스트 속 예문**: *"그녀는 3년 동안 영어를 공부해오고 있다."*\n   - **추가 예문**:\n     a) 나는 오후 2시부터 너를 기다리고 있어.\n     b) 그들은 일주일 내내 이 프로젝트에 매달려 왔어.\n   - **흔한 실수**: 단순 현재완료와 혼동하거나, 조동사 "been"을 빼먹는 경우.\n\n텍스트: $text',
+
       LangOption.examples:
-          (text) => '아래 텍스트에서 중요한 단어나 표현을 골라, 각 단어/표현별로 새로운 예문을 만들어줘.\n$text',
+          (text) =>
+              '아래 텍스트에서 중요한 단어나 표현 5-7개를 선택해줘. 각 단어/표현마다: 1) 단어를 굵게 표시, 2) 품사와 간단한 정의를 괄호 안에 표시, 3) 텍스트에서 사용된 원래 문장을 이탤릭체로 표시, 4) 다양한 맥락에서 해당 단어/표현을 사용한 새로운 예문 3개를 제공(간단한 것부터 복잡한 것까지). 예문은 자연스럽고 B1 수준의 학습자에게 유용해야 함.\n\n예시 형식:\n\n1. **극복하다** (동사, 문제를 해결하는 데 성공하다)\n   - *원문: "그녀는 목표에 도달하기 위해 많은 도전을 극복했다."*\n   - 새로운 예문:\n     a) 나는 고소공포증을 극복하는 데 몇 년이 걸렸다.\n     b) 팀은 우승하기 전에 여러 장애물을 극복해야 했다.\n     c) 결심만 있다면, 인생에서 마주하는 거의 모든 어려움을 극복할 수 있다.\n\n텍스트: $text',
+
       LangOption.dialogue:
-          (text) => '아래 주제(텍스트)로 B1 수준에 맞는 짧은 회화문(질문/답변 3세트)을 만들어줘.\n$text',
+          (text) =>
+              '아래 텍스트를 바탕으로 자연스러운 대화를 만들어줘. 대화는 다음 조건을 충족해야 함:\n1) A와 B 두 사람 간의 질문-답변 3-4쌍 포함\n2) 텍스트의 주요 어휘와 주제 반영\n3) B1 수준(중급)으로, 약간 도전적인 어휘가 있되 맥락이 명확해야 함\n4) 일상적인 대화 표현과 자연스러운 응답 포함\n5) 논리적인 결론으로 마무리\n\n대화는 이름과 줄바꿈으로 명확하게 구분해줘. 대화 후에는 "언어 노트" 섹션을 추가하여 대화에서 사용된 유용한 표현이나 문법 포인트 3-4개를 설명해줘.\n\n예시 형식:\n\nA: [첫 번째 질문이나 발언]\nB: [응답, 가능하면 후속 질문 포함]\nA: [B의 질문에 대한 응답]\n...\n\n언어 노트:\n1. "[표현]" - 설명 및 사용법\n2. "[문법 포인트]" - 예시와 함께 설명\n\n텍스트: $text',
     },
   };
 
-  // 안내문구
   final Map<String, String> instructionText = {
     'en': 'Choose a language learning task for this text.',
     'ko': '이 텍스트로 원하는 어학 학습 작업을 선택하세요.',
   };
 
-  // Markdowm parsing
+  final Map<String, Map<String, String>> contentTypeLabels = {
+    'en': {
+      'text': 'Text Content',
+      'document': 'Document Content',
+      'unknown': 'Unknown Content',
+    },
+    'ko': {'text': '텍스트 내용', 'document': '문서 내용', 'unknown': '알 수 없는 내용'},
+  };
+
   List<Map<String, String>> _parseVocabTable(String text) {
     final lines = text.split('\n');
     final List<Map<String, String>> result = [];
@@ -940,7 +251,6 @@ class _PersonalScreenState extends State<PersonalScreen> {
       if (line.trim().startsWith('|')) {
         final cells = line.split('|').map((e) => e.trim()).toList();
         if (cells.length >= 4 && cells[1].isNotEmpty) {
-          // 헤더/구분선 건너뜀
           if (!headerPassed) {
             headerPassed = true;
             continue;
@@ -958,21 +268,13 @@ class _PersonalScreenState extends State<PersonalScreen> {
     return result;
   }
 
-  @override
-  void initState() {
-    super.initState();
-    if (widget.sharingType == 'text' && widget.sharedText.isNotEmpty) {
-      _detectedLang = _detectLang(widget.sharedText);
-    }
-  }
-
-  Future<void> _loadHistory() async {
-    final history = await LocalStorage.loadData();
-    setState(() {
-      _history = history.reversed.toList();
-      _showHistory = true;
-    });
-  }
+  // Future<void> _loadHistory() async {
+  //   final history = await LocalStorage.loadData();
+  //   setState(() {
+  //     _history = history.reversed.toList();
+  //     _showHistory = true;
+  //   });
+  // }
 
   Future<void> _handleOptionSubmit() async {
     setState(() {
@@ -982,7 +284,7 @@ class _PersonalScreenState extends State<PersonalScreen> {
     });
 
     String prompt = '';
-    String text = widget.sharedText;
+    String text = _extractedText;
     String lang = _detectedLang;
 
     if (_selectedOption == null) {
@@ -1003,7 +305,7 @@ class _PersonalScreenState extends State<PersonalScreen> {
         });
         return;
       }
-      prompt = otherText;
+      prompt = '$otherText\n\n$text';
     } else {
       prompt = promptTemplates[lang]![_selectedOption!]!(text);
     }
@@ -1027,6 +329,47 @@ class _PersonalScreenState extends State<PersonalScreen> {
     }
   }
 
+  Future<void> _viewPdf(String filePath) async {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder:
+            (context) => Scaffold(
+              appBar: AppBar(
+                title: Text(path.basename(filePath)),
+                actions: [
+                  IconButton(
+                    icon: const Icon(Icons.share),
+                    onPressed: () => _shareFile(filePath),
+                  ),
+                ],
+              ),
+              body: PDFView(
+                filePath: filePath,
+                enableSwipe: true,
+                swipeHorizontal: true,
+                autoSpacing: false,
+                pageFling: false,
+                pageSnap: true,
+                defaultPage: 0,
+                fitPolicy: FitPolicy.BOTH,
+                preventLinkNavigation: false,
+              ),
+            ),
+      ),
+    );
+  }
+
+  Future<void> _shareFile(String filePath) async {
+    try {
+      await Share.shareXFiles([XFile(filePath)]);
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('파일 공유 중 오류가 발생했습니다: $e')));
+    }
+  }
+
   @override
   void dispose() {
     _otherController.dispose();
@@ -1035,7 +378,7 @@ class _PersonalScreenState extends State<PersonalScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return _showHistory ? _buildHistoryScreen() : _buildMainScreen();
+    return _buildMainScreen();
   }
 
   Widget _buildMainScreen() {
@@ -1044,234 +387,336 @@ class _PersonalScreenState extends State<PersonalScreen> {
         title: Text(
           _detectedLang == 'ko' ? '어학 학습 도우미' : 'Language Learning Helper',
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.history),
-            onPressed: _loadHistory,
-            tooltip: _detectedLang == 'ko' ? '히스토리 보기' : 'View History',
-          ),
-        ],
+        // actions: [
+        //   IconButton(
+        //     icon: const Icon(Icons.history),
+        //     onPressed: _loadHistory,
+        //     tooltip: _detectedLang == 'ko' ? '히스토리 보기' : 'View History',
+        //   ),
+        // ],
       ),
-      body: _buildCurrentContent(),
+      body:
+          _isLoading && !_isProcessingFile
+              ? const Center(child: CircularProgressIndicator())
+              : _buildCurrentContent(),
       backgroundColor: Colors.grey[100],
     );
   }
 
-  Widget _buildHistoryScreen() {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(_detectedLang == 'ko' ? '공유 기록' : 'Shared History'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => setState(() => _showHistory = false),
-        ),
-      ),
-      body: ListView.builder(
-        itemCount: _history.length,
-        itemBuilder: (ctx, index) => _buildHistoryItem(_history[index]),
-      ),
-      backgroundColor: Colors.grey[100],
-    );
-  }
+  // Widget _buildHistoryScreen() {
+  //   return Scaffold(
+  //     appBar: AppBar(
+  //       title: Text(_detectedLang == 'ko' ? '공유 기록' : 'Shared History'),
+  //       leading: IconButton(
+  //         icon: const Icon(Icons.arrow_back),
+  //         onPressed: () => setState(() => _showHistory = false),
+  //       ),
+  //     ),
+  //     body: ListView.builder(
+  //       itemCount: _history.length,
+  //       itemBuilder: (ctx, index) => _buildHistoryItem(_history[index]),
+  //     ),
+  //     backgroundColor: Colors.grey[100],
+  //   );
+  // }
 
   Widget _buildCurrentContent() {
-    // 텍스트 공유일 때
-    if (widget.sharingType == 'text' && widget.sharedText.isNotEmpty) {
-      return SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // 1. 공유된 텍스트 카드
-            Card(
-              elevation: 4,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(18),
-              ),
-              color: Colors.white,
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Text(
-                  widget.sharedText,
-                  style: const TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 28),
-
-            // 2. 안내문구
-            Text(
-              instructionText[_detectedLang] ?? instructionText['en']!,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 17,
-                color: Colors.blue[700],
-              ),
-            ),
-            const SizedBox(height: 18),
-
-            // 3. 어학 학습 옵션 카드 리스트
-            _buildLangLearningOptions(),
-
-            // 4. 기타 요청 입력란
-            if (_selectedOption == LangOption.other)
-              Padding(
-                padding: const EdgeInsets.only(top: 10, bottom: 8),
-                child: TextField(
-                  controller: _otherController,
-                  decoration: InputDecoration(
-                    labelText:
-                        _detectedLang == 'ko'
-                            ? '기타 요청을 입력하세요'
-                            : 'Enter your custom request',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                  ),
-                  minLines: 1,
-                  maxLines: 3,
-                ),
-              ),
-
-            const SizedBox(height: 24),
-
-            // 5. 요청하기 버튼
-            ElevatedButton.icon(
-              onPressed: _isLoading ? null : _handleOptionSubmit,
-              icon: const Icon(Icons.send, size: 20),
-              label: Text(
-                _detectedLang == 'ko' ? '요청하기' : 'Submit',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blueAccent,
-                foregroundColor: Colors.white,
-                minimumSize: const Size.fromHeight(48),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                elevation: 3,
-              ),
-            ),
-
-            const SizedBox(height: 32),
-
-            // 6. 로딩 인디케이터
-            if (_isLoading) const Center(child: CircularProgressIndicator()),
-
-            // 7. Gemini 결과 및 퀴즈 풀기 버튼
-            if (_result != null)
-              MarkdownResultCard(
-                markdownText: _result!,
-                bottomWidget:
-                    (_selectedOption == LangOption.vocab &&
-                            _parsedVocabList.isNotEmpty)
-                        ? ElevatedButton.icon(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder:
-                                    (_) =>
-                                        QuizScreen(vocabList: _parsedVocabList),
-                              ),
-                            );
-                          },
-                          icon: const Icon(Icons.quiz),
-                          label: Text(
-                            _detectedLang == 'ko' ? '퀴즈 풀기' : 'Start Quiz',
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            minimumSize: const Size.fromHeight(48),
-                          ),
-                        )
-                        : null,
-              ),
-            // Card(
-            //   color: Colors.blue[50],
-            //   margin: const EdgeInsets.only(top: 12),
-            //   shape: RoundedRectangleBorder(
-            //     borderRadius: BorderRadius.circular(14),
-            //   ),
-            //   child: Padding(
-            //     padding: const EdgeInsets.all(20),
-            //     child: Column(
-            //       crossAxisAlignment: CrossAxisAlignment.stretch,
-            //       children: [
-            //         Text(_result!, style: const TextStyle(fontSize: 16)),
-            //         // "주요 단어/표현 뽑기" 결과 + 퀴즈 풀기 버튼
-            //         if (_selectedOption == LangOption.vocab &&
-            //             _parsedVocabList.isNotEmpty)
-            //           Padding(
-            //             padding: const EdgeInsets.only(top: 20),
-            //             child: ElevatedButton.icon(
-            //               onPressed: () {
-            //                 Navigator.push(
-            //                   context,
-            //                   MaterialPageRoute(
-            //                     builder:
-            //                         (_) => QuizScreen(
-            //                           vocabList: _parsedVocabList,
-            //                         ),
-            //                   ),
-            //                 );
-            //               },
-            //                       icon: const Icon(Icons.quiz),
-            //                       label: Text(
-            //                         _detectedLang == 'ko' ? '퀴즈 풀기' : 'Start Quiz',
-            //                       ),
-            //                       style: ElevatedButton.styleFrom(
-            //                         minimumSize: const Size.fromHeight(48),
-            //                       ),
-            //                     ),
-            //                   ),
-            //               ],
-            //             ),
-            //           ),
-            //         ),
-          ],
-        ),
-      );
+    // 처리 중인 경우 로딩 표시
+    if (_isProcessingFile) {
+      return const Center(child: CircularProgressIndicator());
     }
 
-    // 파일 공유 등 다른 경우
-    if ((widget.sharingType == 'file' ||
-            widget.sharingType == 'media_stream' ||
-            widget.sharingType == 'initial_media') &&
-        widget.sharedFiles.isNotEmpty) {
-      return ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: widget.sharedFiles.length,
-        itemBuilder:
-            (ctx, i) => Card(
-              margin: const EdgeInsets.symmetric(vertical: 8),
+    // 콘텐츠 유형에 따라 다른 UI 표시
+    switch (_contentType) {
+      case ContentType.text:
+        return _buildTextContent();
+      case ContentType.document:
+        return _buildDocumentContent();
+      case ContentType.unknown:
+      default:
+        if (widget.sharedFiles.isNotEmpty) {
+          return _buildUnsupportedFilesContent();
+        } else {
+          return Center(
+            child: Text(
+              _detectedLang == 'ko'
+                  ? '공유된 내용이 없습니다'
+                  : 'No shared content found.',
+              style: const TextStyle(fontSize: 18, color: Colors.grey),
+            ),
+          );
+        }
+    }
+  }
+
+  Widget _buildTextContent() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Card(
+            elevation: 4,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18),
+            ),
+            color: Colors.white,
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    contentTypeLabels[_detectedLang]!['text']!,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue[700],
+                    ),
+                  ),
+                  const Divider(),
+                  Text(
+                    _extractedText,
+                    style: const TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 28),
+
+          Text(
+            instructionText[_detectedLang] ?? instructionText['en']!,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 17,
+              color: Colors.blue[700],
+            ),
+          ),
+          const SizedBox(height: 18),
+
+          _buildLangLearningOptions(),
+
+          if (_selectedOption == LangOption.other)
+            Padding(
+              padding: const EdgeInsets.only(top: 10, bottom: 8),
+              child: TextField(
+                controller: _otherController,
+                decoration: InputDecoration(
+                  labelText:
+                      _detectedLang == 'ko'
+                          ? '기타 요청을 입력하세요'
+                          : 'Enter your custom request',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                minLines: 1,
+                maxLines: 3,
+              ),
+            ),
+
+          const SizedBox(height: 24),
+          ElevatedButton.icon(
+            onPressed: _isLoading ? null : _handleOptionSubmit,
+            icon: const Icon(Icons.send, size: 20),
+            label: Text(
+              _detectedLang == 'ko' ? '요청하기' : 'Submit',
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blueAccent,
+              foregroundColor: Colors.white,
+              minimumSize: const Size.fromHeight(48),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
-              elevation: 2,
-              child: ListTile(
-                leading: Icon(Icons.insert_drive_file, color: Colors.blue[400]),
-                title: Text(
-                  widget.sharedFiles[i].path.split('/').last,
-                  style: const TextStyle(fontWeight: FontWeight.w600),
-                ),
+              elevation: 3,
+            ),
+          ),
+
+          const SizedBox(height: 32),
+
+          if (_isLoading) const Center(child: CircularProgressIndicator()),
+
+          if (_result != null)
+            MarkdownResultCard(
+              markdownText: _result!,
+              isVocabResult: _selectedOption == LangOption.vocab,
+              bottomWidget: null,
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDocumentContent() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Card(
+            elevation: 4,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18),
+            ),
+            color: Colors.white,
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        contentTypeLabels[_detectedLang]!['document']!,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue[700],
+                        ),
+                      ),
+                      if (_documentPath != null)
+                        Row(
+                          children: [
+                            IconButton(
+                              icon: const Icon(
+                                Icons.visibility,
+                                color: Colors.blue,
+                              ),
+                              onPressed: () => _viewPdf(_documentPath!),
+                              tooltip:
+                                  _detectedLang == 'ko'
+                                      ? '문서 보기'
+                                      : 'View Document',
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.share, color: Colors.blue),
+                              onPressed: () => _shareFile(_documentPath!),
+                              tooltip:
+                                  _detectedLang == 'ko'
+                                      ? '문서 공유'
+                                      : 'Share Document',
+                            ),
+                          ],
+                        ),
+                    ],
+                  ),
+                  const Divider(),
+                  if (_documentPath != null)
+                    Text(
+                      '${_detectedLang == 'ko' ? '파일명: ' : 'File: '}${path.basename(_documentPath!)}',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  // 파일 내용은 표시하지 않고 파일명만 표시
+                ],
               ),
             ),
-      );
-    }
+          ),
+          const SizedBox(height: 28),
 
-    // 아무것도 없을 때
-    return Center(
-      child: Text(
-        _detectedLang == 'ko' ? '공유된 내용이 없습니다' : 'No shared content found.',
-        style: const TextStyle(fontSize: 18, color: Colors.grey),
+          Text(
+            instructionText[_detectedLang] ?? instructionText['en']!,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 17,
+              color: Colors.blue[700],
+            ),
+          ),
+          const SizedBox(height: 18),
+
+          _buildLangLearningOptions(),
+
+          if (_selectedOption == LangOption.other)
+            Padding(
+              padding: const EdgeInsets.only(top: 10, bottom: 8),
+              child: TextField(
+                controller: _otherController,
+                decoration: InputDecoration(
+                  labelText:
+                      _detectedLang == 'ko'
+                          ? '기타 요청을 입력하세요'
+                          : 'Enter your custom request',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                minLines: 1,
+                maxLines: 3,
+              ),
+            ),
+
+          const SizedBox(height: 24),
+          ElevatedButton.icon(
+            onPressed: _isLoading ? null : _handleOptionSubmit,
+            icon: const Icon(Icons.send, size: 20),
+            label: Text(
+              _detectedLang == 'ko' ? '요청하기' : 'Submit',
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blueAccent,
+              foregroundColor: Colors.white,
+              minimumSize: const Size.fromHeight(48),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              elevation: 3,
+            ),
+          ),
+
+          const SizedBox(height: 32),
+
+          if (_isLoading) const Center(child: CircularProgressIndicator()),
+
+          if (_result != null)
+            MarkdownResultCard(
+              markdownText: _result!,
+              isVocabResult: _selectedOption == LangOption.vocab,
+              bottomWidget: null,
+            ),
+        ],
       ),
+    );
+  }
+
+  Widget _buildUnsupportedFilesContent() {
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: widget.sharedFiles.length,
+      itemBuilder:
+          (ctx, i) => Card(
+            margin: const EdgeInsets.symmetric(vertical: 8),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            elevation: 2,
+            child: ListTile(
+              leading: Icon(Icons.insert_drive_file, color: Colors.blue[400]),
+              title: Text(
+                widget.sharedFiles[i].path.split('/').last,
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+              subtitle: Text(
+                _detectedLang == 'ko'
+                    ? '지원되지 않는 파일 형식입니다.'
+                    : 'Unsupported file format.',
+                style: const TextStyle(color: Colors.grey),
+              ),
+              trailing: IconButton(
+                icon: const Icon(Icons.share, color: Colors.blue),
+                onPressed: () => _shareFile(widget.sharedFiles[i].path),
+              ),
+            ),
+          ),
     );
   }
 
@@ -1279,7 +724,6 @@ class _PersonalScreenState extends State<PersonalScreen> {
     final labels = optionLabels[_detectedLang]!;
     final icons = {
       LangOption.vocab: Icons.language,
-      LangOption.correction: Icons.spellcheck,
       LangOption.grammar: Icons.rule,
       LangOption.examples: Icons.edit_note,
       LangOption.dialogue: Icons.forum,
@@ -1382,117 +826,117 @@ class _PersonalScreenState extends State<PersonalScreen> {
     );
   }
 
-  Widget _buildHistoryItem(SharedData data) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      elevation: 2,
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: Colors.blue[100],
-          child: Icon(
-            data.type == 'text' ? Icons.text_snippet : Icons.file_copy,
-            color: Colors.blueAccent,
-          ),
-        ),
-        title: Text(
-          _getPreview(data),
-          style: const TextStyle(fontWeight: FontWeight.w600),
-        ),
-        subtitle: Text(
-          DateFormat('yyyy-MM-dd HH:mm').format(data.timestamp),
-          style: const TextStyle(color: Colors.grey),
-        ),
-        onTap: () => _showDetailDialog(context, data),
-        trailing: IconButton(
-          icon: const Icon(Icons.delete, color: Colors.redAccent),
-          onPressed: () => _deleteItem(data),
-        ),
-      ),
-    );
-  }
+  // Widget _buildHistoryItem(SharedData data) {
+  //   return Card(
+  //     margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+  //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+  //     elevation: 2,
+  //     child: ListTile(
+  //       leading: CircleAvatar(
+  //         backgroundColor: Colors.blue[100],
+  //         child: Icon(
+  //           data.type == 'text' ? Icons.text_snippet : Icons.file_copy,
+  //           color: Colors.blueAccent,
+  //         ),
+  //       ),
+  //       title: Text(
+  //         _getPreview(data),
+  //         style: const TextStyle(fontWeight: FontWeight.w600),
+  //       ),
+  //       subtitle: Text(
+  //         DateFormat('yyyy-MM-dd HH:mm').format(data.timestamp),
+  //         style: const TextStyle(color: Colors.grey),
+  //       ),
+  //       onTap: () => _showDetailDialog(context, data),
+  //       // trailing: IconButton(
+  //       //   icon: const Icon(Icons.delete, color: Colors.redAccent),
+  //       //   onPressed: () => _deleteItem(data),
+  //       // ),
+  //     ),
+  //   );
+  // }
 
-  String _getPreview(SharedData data) {
-    if (data.type == 'text') {
-      return data.text.isNotEmpty
-          ? (data.text.length > 20
-              ? '${data.text.substring(0, 20)}...'
-              : data.text)
-          : (_detectedLang == 'ko' ? '텍스트 없음' : 'No text');
-    } else {
-      return data.filePaths.isNotEmpty
-          ? '${data.filePaths.length}${_detectedLang == 'ko' ? '개의 파일' : ' files'}'
-          : (_detectedLang == 'ko' ? '파일 없음' : 'No file');
-    }
-  }
+  // String _getPreview(SharedData data) {
+  //   if (data.type == 'text') {
+  //     return data.text.isNotEmpty
+  //         ? (data.text.length > 20
+  //             ? '${data.text.substring(0, 20)}...'
+  //             : data.text)
+  //         : (_detectedLang == 'ko' ? '텍스트 없음' : 'No text');
+  //   } else {
+  //     return data.filePaths.isNotEmpty
+  //         ? '${data.filePaths.length}${_detectedLang == 'ko' ? '개의 파일' : ' files'}'
+  //         : (_detectedLang == 'ko' ? '파일 없음' : 'No file');
+  //   }
+  // }
 
-  void _showDetailDialog(BuildContext context, SharedData data) {
-    showDialog(
-      context: context,
-      builder:
-          (_) => AlertDialog(
-            title: Text(_detectedLang == 'ko' ? '상세 정보' : 'Detail'),
-            content: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 300, maxHeight: 400),
-              child:
-                  data.type == 'text'
-                      ? SingleChildScrollView(child: Text(data.text))
-                      : ListView(
-                        shrinkWrap: true,
-                        children:
-                            data.filePaths
-                                .map(
-                                  (path) => Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 4,
-                                    ),
-                                    child: Text(
-                                      '• ${path.split('/').last}',
-                                      style: const TextStyle(fontSize: 16),
-                                    ),
-                                  ),
-                                )
-                                .toList(),
-                      ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text(_detectedLang == 'ko' ? '닫기' : 'Close'),
-              ),
-            ],
-          ),
-    );
-  }
+  // void _showDetailDialog(BuildContext context, SharedData data) {
+  //   showDialog(
+  //     context: context,
+  //     builder:
+  //         (_) => AlertDialog(
+  //           title: Text(_detectedLang == 'ko' ? '상세 정보' : 'Detail'),
+  //           content: ConstrainedBox(
+  //             constraints: const BoxConstraints(maxWidth: 300, maxHeight: 400),
+  //             child:
+  //                 data.type == 'text'
+  //                     ? SingleChildScrollView(child: Text(data.text))
+  //                     : ListView(
+  //                       shrinkWrap: true,
+  //                       children:
+  //                           data.filePaths
+  //                               .map(
+  //                                 (path) => Padding(
+  //                                   padding: const EdgeInsets.symmetric(
+  //                                     vertical: 4,
+  //                                   ),
+  //                                   child: Text(
+  //                                     '• ${path.split('/').last}',
+  //                                     style: const TextStyle(fontSize: 16),
+  //                                   ),
+  //                                 ),
+  //                               )
+  //                               .toList(),
+  //                     ),
+  //           ),
+  //           actions: [
+  //             TextButton(
+  //               onPressed: () => Navigator.pop(context),
+  //               child: Text(_detectedLang == 'ko' ? '닫기' : 'Close'),
+  //             ),
+  //           ],
+  //         ),
+  //   );
+  // }
 
-  Future<void> _deleteItem(SharedData data) async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder:
-          (_) => AlertDialog(
-            title: Text(_detectedLang == 'ko' ? '삭제 확인' : 'Delete'),
-            content: Text(
-              _detectedLang == 'ko'
-                  ? '이 항목을 정말 삭제하시겠습니까?'
-                  : 'Are you sure you want to delete this item?',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: Text(_detectedLang == 'ko' ? '취소' : 'Cancel'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(context, true),
-                child: Text(_detectedLang == 'ko' ? '삭제' : 'Delete'),
-              ),
-            ],
-          ),
-    );
+  // Future<void> _deleteItem(SharedData data) async {
+  //   final confirm = await showDialog<bool>(
+  //     context: context,
+  //     builder:
+  //         (_) => AlertDialog(
+  //           title: Text(_detectedLang == 'ko' ? '삭제 확인' : 'Delete'),
+  //           content: Text(
+  //             _detectedLang == 'ko'
+  //                 ? '이 항목을 정말 삭제하시겠습니까?'
+  //                 : 'Are you sure you want to delete this item?',
+  //           ),
+  //           actions: [
+  //             TextButton(
+  //               onPressed: () => Navigator.pop(context, false),
+  //               child: Text(_detectedLang == 'ko' ? '취소' : 'Cancel'),
+  //             ),
+  //             TextButton(
+  //               onPressed: () => Navigator.pop(context, true),
+  //               child: Text(_detectedLang == 'ko' ? '삭제' : 'Delete'),
+  //             ),
+  //           ],
+  //         ),
+  //   );
 
-    if (confirm ?? false) {
-      final newHistory = _history.where((item) => item != data).toList();
-      await LocalStorage.saveAllData(newHistory);
-      setState(() => _history = newHistory);
-    }
-  }
+  //   if (confirm ?? false) {
+  //     final newHistory = _history.where((item) => item != data).toList();
+  //     await LocalStorage.saveAllData(newHistory);
+  //     setState(() => _history = newHistory);
+  //   }
+  // }
 }
