@@ -2,16 +2,12 @@ import 'dart:io';
 import 'package:estudy_gpt/widgets/markdown_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:estudy_gpt/models/shared_data.dart';
-import 'package:intl/intl.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
-import 'package:estudy_gpt/utils/local_storage.dart';
 import 'package:estudy_gpt/services/gemini_service.dart';
 import 'package:path/path.dart' as path;
 import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
-import 'quiz_screen.dart';
 
 class PersonalScreen extends StatefulWidget {
   final String sharingType;
@@ -60,14 +56,11 @@ class _PersonalScreenState extends State<PersonalScreen> {
     });
 
     try {
-      // 텍스트 공유인 경우
       if (widget.sharingType == 'text' && widget.sharedText.isNotEmpty) {
         _contentType = ContentType.text;
         _extractedText = widget.sharedText;
         _detectedLang = _detectLang(_extractedText);
-      }
-      // 파일 공유인 경우
-      else if ((widget.sharingType == 'file' ||
+      } else if ((widget.sharingType == 'file' ||
               widget.sharingType == 'media_stream' ||
               widget.sharingType == 'initial_media') &&
           widget.sharedFiles.isNotEmpty) {
@@ -81,7 +74,6 @@ class _PersonalScreenState extends State<PersonalScreen> {
           _contentType = ContentType.document;
           _documentPath = filePath;
 
-          // 파일 내용 추출
           await _extractDocumentContent(filePath, extension);
         } else {
           _contentType = ContentType.unknown;
@@ -107,15 +99,12 @@ class _PersonalScreenState extends State<PersonalScreen> {
 
     try {
       if (extension == '.txt') {
-        // TXT 파일 읽기
         final file = File(filePath);
         _extractedText = await file.readAsString();
         _detectedLang = _detectLang(_extractedText);
       } else if (extension == '.pdf') {
-        // PDF 파일 텍스트 추출
         _documentPath = filePath;
 
-        // Syncfusion PDF 라이브러리를 사용하여 텍스트 추출
         final bytes = await File(filePath).readAsBytes();
         final document = PdfDocument(inputBytes: bytes);
         final extractor = PdfTextExtractor(document);
@@ -124,10 +113,9 @@ class _PersonalScreenState extends State<PersonalScreen> {
 
         _detectedLang = _detectLang(_extractedText);
       } else {
-        // 기타 문서 형식 (doc, docx 등)
         _documentPath = filePath;
         _extractedText = "문서 파일에서 추출된 텍스트입니다. 실제 앱에서는 문서 텍스트 추출 라이브러리를 사용하세요.";
-        _detectedLang = 'ko'; // 기본값
+        _detectedLang = 'ko';
       }
     } catch (e) {
       print('Error extracting document content: $e');
@@ -268,14 +256,6 @@ class _PersonalScreenState extends State<PersonalScreen> {
     return result;
   }
 
-  // Future<void> _loadHistory() async {
-  //   final history = await LocalStorage.loadData();
-  //   setState(() {
-  //     _history = history.reversed.toList();
-  //     _showHistory = true;
-  //   });
-  // }
-
   Future<void> _handleOptionSubmit() async {
     setState(() {
       _isLoading = true;
@@ -387,13 +367,6 @@ class _PersonalScreenState extends State<PersonalScreen> {
         title: Text(
           _detectedLang == 'ko' ? '어학 학습 도우미' : 'Language Learning Helper',
         ),
-        // actions: [
-        //   IconButton(
-        //     icon: const Icon(Icons.history),
-        //     onPressed: _loadHistory,
-        //     tooltip: _detectedLang == 'ko' ? '히스토리 보기' : 'View History',
-        //   ),
-        // ],
       ),
       body:
           _isLoading && !_isProcessingFile
@@ -403,30 +376,11 @@ class _PersonalScreenState extends State<PersonalScreen> {
     );
   }
 
-  // Widget _buildHistoryScreen() {
-  //   return Scaffold(
-  //     appBar: AppBar(
-  //       title: Text(_detectedLang == 'ko' ? '공유 기록' : 'Shared History'),
-  //       leading: IconButton(
-  //         icon: const Icon(Icons.arrow_back),
-  //         onPressed: () => setState(() => _showHistory = false),
-  //       ),
-  //     ),
-  //     body: ListView.builder(
-  //       itemCount: _history.length,
-  //       itemBuilder: (ctx, index) => _buildHistoryItem(_history[index]),
-  //     ),
-  //     backgroundColor: Colors.grey[100],
-  //   );
-  // }
-
   Widget _buildCurrentContent() {
-    // 처리 중인 경우 로딩 표시
     if (_isProcessingFile) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    // 콘텐츠 유형에 따라 다른 UI 표시
     switch (_contentType) {
       case ContentType.text:
         return _buildTextContent();
@@ -616,7 +570,6 @@ class _PersonalScreenState extends State<PersonalScreen> {
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                  // 파일 내용은 표시하지 않고 파일명만 표시
                 ],
               ),
             ),
@@ -825,118 +778,4 @@ class _PersonalScreenState extends State<PersonalScreen> {
           }).toList(),
     );
   }
-
-  // Widget _buildHistoryItem(SharedData data) {
-  //   return Card(
-  //     margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-  //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-  //     elevation: 2,
-  //     child: ListTile(
-  //       leading: CircleAvatar(
-  //         backgroundColor: Colors.blue[100],
-  //         child: Icon(
-  //           data.type == 'text' ? Icons.text_snippet : Icons.file_copy,
-  //           color: Colors.blueAccent,
-  //         ),
-  //       ),
-  //       title: Text(
-  //         _getPreview(data),
-  //         style: const TextStyle(fontWeight: FontWeight.w600),
-  //       ),
-  //       subtitle: Text(
-  //         DateFormat('yyyy-MM-dd HH:mm').format(data.timestamp),
-  //         style: const TextStyle(color: Colors.grey),
-  //       ),
-  //       onTap: () => _showDetailDialog(context, data),
-  //       // trailing: IconButton(
-  //       //   icon: const Icon(Icons.delete, color: Colors.redAccent),
-  //       //   onPressed: () => _deleteItem(data),
-  //       // ),
-  //     ),
-  //   );
-  // }
-
-  // String _getPreview(SharedData data) {
-  //   if (data.type == 'text') {
-  //     return data.text.isNotEmpty
-  //         ? (data.text.length > 20
-  //             ? '${data.text.substring(0, 20)}...'
-  //             : data.text)
-  //         : (_detectedLang == 'ko' ? '텍스트 없음' : 'No text');
-  //   } else {
-  //     return data.filePaths.isNotEmpty
-  //         ? '${data.filePaths.length}${_detectedLang == 'ko' ? '개의 파일' : ' files'}'
-  //         : (_detectedLang == 'ko' ? '파일 없음' : 'No file');
-  //   }
-  // }
-
-  // void _showDetailDialog(BuildContext context, SharedData data) {
-  //   showDialog(
-  //     context: context,
-  //     builder:
-  //         (_) => AlertDialog(
-  //           title: Text(_detectedLang == 'ko' ? '상세 정보' : 'Detail'),
-  //           content: ConstrainedBox(
-  //             constraints: const BoxConstraints(maxWidth: 300, maxHeight: 400),
-  //             child:
-  //                 data.type == 'text'
-  //                     ? SingleChildScrollView(child: Text(data.text))
-  //                     : ListView(
-  //                       shrinkWrap: true,
-  //                       children:
-  //                           data.filePaths
-  //                               .map(
-  //                                 (path) => Padding(
-  //                                   padding: const EdgeInsets.symmetric(
-  //                                     vertical: 4,
-  //                                   ),
-  //                                   child: Text(
-  //                                     '• ${path.split('/').last}',
-  //                                     style: const TextStyle(fontSize: 16),
-  //                                   ),
-  //                                 ),
-  //                               )
-  //                               .toList(),
-  //                     ),
-  //           ),
-  //           actions: [
-  //             TextButton(
-  //               onPressed: () => Navigator.pop(context),
-  //               child: Text(_detectedLang == 'ko' ? '닫기' : 'Close'),
-  //             ),
-  //           ],
-  //         ),
-  //   );
-  // }
-
-  // Future<void> _deleteItem(SharedData data) async {
-  //   final confirm = await showDialog<bool>(
-  //     context: context,
-  //     builder:
-  //         (_) => AlertDialog(
-  //           title: Text(_detectedLang == 'ko' ? '삭제 확인' : 'Delete'),
-  //           content: Text(
-  //             _detectedLang == 'ko'
-  //                 ? '이 항목을 정말 삭제하시겠습니까?'
-  //                 : 'Are you sure you want to delete this item?',
-  //           ),
-  //           actions: [
-  //             TextButton(
-  //               onPressed: () => Navigator.pop(context, false),
-  //               child: Text(_detectedLang == 'ko' ? '취소' : 'Cancel'),
-  //             ),
-  //             TextButton(
-  //               onPressed: () => Navigator.pop(context, true),
-  //               child: Text(_detectedLang == 'ko' ? '삭제' : 'Delete'),
-  //             ),
-  //           ],
-  //         ),
-  //   );
-
-  //   if (confirm ?? false) {
-  //     final newHistory = _history.where((item) => item != data).toList();
-  //     await LocalStorage.saveAllData(newHistory);
-  //     setState(() => _history = newHistory);
-  //   }
-  // }
 }
