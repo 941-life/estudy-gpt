@@ -1,5 +1,6 @@
 import React from 'react';
 import styles from '../styles/AnalysisModal.module.css';
+import CEFRLevelDisplay from './CEFRLevelDisplay';
 
 function AnalysisModal({ analysis, onClose }) {
   if (!analysis) return null;
@@ -17,6 +18,10 @@ function AnalysisModal({ analysis, onClose }) {
             <span className={styles.score}>{analysis.score}</span>
             <span className={styles.scoreLabel}>점</span>
           </div>
+          <CEFRLevelDisplay 
+            level={analysis.cefrLevel} 
+            previousLevel={analysis.previousCefrLevel}
+          />
         </div>
 
         <div className={styles.summarySection}>

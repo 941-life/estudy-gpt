@@ -51,13 +51,20 @@
 
 .scoreSection {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
   margin-bottom: 24px;
+  gap: 16px;
+}
+
+.totalScore {
+  text-align: center;
+  margin-bottom: 20px;
 }
 
 .scoreCircle {
-  width: 100px;
-  height: 100px;
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
   background: #f0f7ff;
   display: flex;
@@ -80,21 +87,24 @@
 
 .summarySection {
   background: #f8f9fa;
-  padding: 16px;
-  border-radius: 8px;
+  padding: 20px;
+  border-radius: 12px;
   margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .summarySection h3 {
-  margin: 0 0 8px 0;
+  margin: 0 0 12px 0;
   color: #333;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
+  font-weight: 600;
 }
 
 .summarySection p {
   margin: 0;
   color: #555;
-  line-height: 1.5;
+  line-height: 1.6;
+  font-size: 1rem;
 }
 
 .correctionsSection {
@@ -104,15 +114,23 @@
 .correctionsSection h3 {
   margin: 0 0 16px 0;
   color: #333;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
+  font-weight: 600;
 }
 
 .correctionItem {
   background: #fff;
   border: 1px solid #e1e4e8;
-  border-radius: 8px;
-  padding: 16px;
+  border-radius: 12px;
+  padding: 20px;
   margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease;
+}
+
+.correctionItem:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .correctionItem:last-child {
@@ -123,25 +141,32 @@
   display: block;
   font-weight: 600;
   color: #666;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
   font-size: 0.9rem;
 }
 
 .original, .corrected, .explanation {
-  margin-bottom: 12px;
+  margin-bottom: 16px;
+  padding: 12px;
+  border-radius: 8px;
 }
 
-.original p, .corrected p, .explanation p {
-  margin: 0;
-  line-height: 1.5;
-  color: #333;
+.original {
+  background: #f8f9fa;
 }
 
 .corrected {
+  background: #e8f5e9;
   color: #2e7d32;
 }
 
 .explanation {
+  background: #f5f5f5;
   color: #666;
-  font-size: 0.95rem;
+}
+
+.original p, .corrected p, .explanation p {
+  margin: 0;
+  line-height: 1.6;
+  font-size: 1rem;
 } 

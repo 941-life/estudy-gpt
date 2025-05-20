@@ -4,6 +4,8 @@ import { fetchGeminiReply, initializeChatSession, clearChatSession, getConversat
 import { saveChat, updateChatAnalysis, initializeAuth } from "../api/firebase";
 import ScenarioSelector from "./ScenarioSelector";
 import AnalysisModal from "./AnalysisModal";
+import { auth, db } from "../firebase/firebaseConfig";
+import { get, ref, update } from "firebase/database";
 
 function ChatRoom({ character, onBack }) {
   const [messages, setMessages] = useState([]);
@@ -16,6 +18,7 @@ function ChatRoom({ character, onBack }) {
   const [analysis, setAnalysis] = useState(null);
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
+  const [userLevel, setUserLevel] = useState("A1");
   const chatEndRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -25,6 +28,16 @@ function ChatRoom({ character, onBack }) {
       try {
         await initializeAuth();
         setIsAuthReady(true);
+        
+        const uid = auth.currentUser.uid;
+        const userRef = ref(db, `users/${uid}`);
+        const snapshot = await get(userRef);
+        if (snapshot.exists()) {
+          const userData = snapshot.val();
+          if (userData.cefrLevel) {
+            setUserLevel(userData.cefrLevel);
+          }
+        }
       } catch (error) {
         console.error('인증 초기화 중 오류:', error);
       } finally {
@@ -56,9 +69,23 @@ function ChatRoom({ character, onBack }) {
     }
   }, [loading, messages]);
 
+  const getLevelAdjustedPrompt = (basePrompt) => {
+    const levelAdjustments = {
+      'A1': 'Use very simple vocabulary and basic grammar. Keep sentences short and clear. Use present tense mostly.',
+      'A2': 'Use simple vocabulary and basic grammar structures. Include some past tense and simple future tense.',
+      'B1': 'Use intermediate vocabulary and grammar. Include various tenses and some complex sentences.',
+      'B2': 'Use advanced vocabulary and complex grammar structures. Include idiomatic expressions and nuanced language.',
+      'C1': 'Use sophisticated vocabulary and complex grammar. Include subtle nuances and cultural references.',
+      'C2': 'Use native-like expressions and complex grammar. Include sophisticated cultural references and nuanced language.'
+    };
+
+    return `${basePrompt}\n\nIMPORTANT: Adjust your language level to match the user's CEFR level (${userLevel}):\n${levelAdjustments[userLevel]}`;
+  };
+
   useEffect(() => {
     if (selectedScenario) {
-      initializeChatSession(character.id, selectedScenario.prompt)
+      const adjustedPrompt = getLevelAdjustedPrompt(selectedScenario.prompt);
+      initializeChatSession(character.id, adjustedPrompt)
         .catch(err => {
           console.error("Failed to initialize chat session:", err);
           setMessages(msgs => [...msgs, {
@@ -67,7 +94,7 @@ function ChatRoom({ character, onBack }) {
           }]);
         });
     }
-  }, [selectedScenario, character.id]);
+  }, [selectedScenario, character.id, userLevel]);
 
   useEffect(() => {
     return () => {
@@ -101,7 +128,8 @@ function ChatRoom({ character, onBack }) {
           }
         ],
         "summary": "encouraging feedback about their communication style (2 lines max)",
-        "score": number between 0 and 100 (based on successful communication, not grammar perfection)
+        "score": number between 0 and 100 (based on successful communication, not grammar perfection),
+        "cefrLevel": "A1" or "A2" or "B1" or "B2" or "C1" or "C2" (based on overall performance)
       }
 
       Analyze these messages:
@@ -127,14 +155,57 @@ function ChatRoom({ character, onBack }) {
         if (!parsedAnalysis.score || typeof parsedAnalysis.score !== 'number') {
           throw new Error('Invalid score format');
         }
+        if (!parsedAnalysis.cefrLevel || !['A1', 'A2', 'B1', 'B2', 'C1', 'C2'].includes(parsedAnalysis.cefrLevel)) {
+          throw new Error('Invalid CEFR level format');
+        }
 
-        return parsedAnalysis;
+        let previousCefrLevel = null;
+        try {
+          const uid = auth.currentUser.uid;
+          const userRef = ref(db, `users/${uid}`);
+          const snapshot = await get(userRef);
+          if (snapshot.exists()) {
+            previousCefrLevel = snapshot.val().cefrLevel;
+          }
+        } catch (error) {
+          console.error('Error fetching previous CEFR level:', error);
+        }
+
+        try {
+          const uid = auth.currentUser.uid;
+          const userRef = ref(db, `users/${uid}`);
+          await update(userRef, {
+            cefrLevel: parsedAnalysis.cefrLevel,
+            lastUpdated: Date.now()
+          });
+        } catch (error) {
+          console.error('Error updating CEFR level:', error);
+        }
+
+        try {
+          await updateChatAnalysis(chatId, {
+            ...parsedAnalysis,
+            messages: messages.filter(msg => msg.role === 'user').map(msg => ({
+              content: msg.content,
+              timestamp: msg.timestamp
+            }))
+          });
+        } catch (error) {
+          console.error('Error saving chat analysis:', error);
+        }
+
+        return {
+          ...parsedAnalysis,
+          previousCefrLevel
+        };
       } catch (e) {
         console.error('Failed to parse analysis response:', e);
         return {
           corrections: [],
           summary: "분석 결과를 파싱하는데 실패했습니다. 다시 시도해주세요.",
-          score: 0
+          score: 0,
+          cefrLevel: "A1",
+          previousCefrLevel: null
         };
       }
     } catch (error) {
@@ -162,7 +233,8 @@ function ChatRoom({ character, onBack }) {
         setChatId(newChatId);
       }
 
-      const response = await fetchGeminiReply(message, character.id);
+      const levelPrompt = `Remember to maintain the conversation at CEFR level ${userLevel}. `;
+      const response = await fetchGeminiReply(message + "\n" + levelPrompt, character.id);
       const responseText = await response.text();
       const cleanResponse = removeMarkdown(responseText);
 
