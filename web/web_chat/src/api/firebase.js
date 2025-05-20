@@ -19,8 +19,23 @@ const auth = getAuth(app);
 
 export const initializeAuth = async () => {
   try {
-    await signInAnonymously(auth);
-    return auth.currentUser.uid;
+    const userCredential = await signInAnonymously(auth);
+    const uid = userCredential.user.uid;
+    
+    // 사용자 데이터가 없으면 초기화
+    const userRef = ref(db, `users/${uid}`);
+    const snapshot = await get(userRef);
+    
+    if (!snapshot.exists()) {
+      await set(userRef, {
+        cefrLevel: 'A1',
+        createdAt: Date.now(),
+        totalSessions: 0,
+        recentScores: []
+      });
+    }
+    
+    return uid;
   } catch (error) {
     console.error('Error initializing anonymous auth:', error);
     throw error;
@@ -47,6 +62,7 @@ export const saveChat = async (message, characterId) => {
   }
 };
 
+//추후 오답노트 기록 불러올 일 생기면 사용할 함수
 export const getChatsByUser = async () => {
   try {
     const uid = auth.currentUser.uid;
