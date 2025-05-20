@@ -1,9 +1,18 @@
 import React from 'react';
 import styles from '../styles/AnalysisModal.module.css';
-import CEFRLevelDisplay from './CEFRLevelDisplay';
 
 function AnalysisModal({ analysis, onClose }) {
   if (!analysis) return null;
+
+  const levels = [
+    { level: 'A1', color: '#e74c3c' },
+    { level: 'A2', color: '#e67e22' },
+    { level: 'B1', color: '#f1c40f' },
+    { level: 'B2', color: '#2ecc71' },
+    { level: 'C1', color: '#3498db' },
+    { level: 'C2', color: '#9b59b6' }
+  ];
+  const currentLevelIndex = levels.findIndex(l => l.level === analysis.cefrLevel);
 
   return (
     <div className={styles.modalOverlay}>
@@ -12,16 +21,31 @@ function AnalysisModal({ analysis, onClose }) {
           <h2>대화 분석 결과</h2>
           <button onClick={onClose} className={styles.closeButton}>×</button>
         </div>
-        
+
         <div className={styles.scoreSection}>
           <div className={styles.scoreCircle}>
             <span className={styles.score}>{analysis.score}</span>
             <span className={styles.scoreLabel}>점</span>
           </div>
-          <CEFRLevelDisplay 
-            level={analysis.cefrLevel} 
-            previousLevel={analysis.previousCefrLevel}
-          />
+          
+          <div className={styles.levelDisplay}>
+            <div className={styles.levelProgress}>
+              {levels.map((level, index) => (
+                <div 
+                  key={level.level} 
+                  className={`${styles.levelStep} ${index <= currentLevelIndex ? styles.active : ''}`}
+                  style={{ '--level-color': level.color }}
+                >
+                  <div className={styles.levelValue}>{level.level}</div>
+                </div>
+              ))}
+            </div>
+            {analysis.previousCefrLevel && analysis.previousCefrLevel !== analysis.cefrLevel && (
+              <div className={styles.levelChange}>
+                Level changed from {analysis.previousCefrLevel} to {analysis.cefrLevel}
+              </div>
+            )}
+          </div>
         </div>
 
         <div className={styles.summarySection}>
