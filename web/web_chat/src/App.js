@@ -20,13 +20,6 @@ function App() {
       ) : (
         <ChatRoom character={selected} onBack={handleBack} />
       )}
-      {!selected && (
-        <nav className={styles.navbar}>
-          <img src={process.env.PUBLIC_URL + "/img/home.png"} alt="home" className={styles.navicon} />
-          <img src={process.env.PUBLIC_URL + "/img/list.png"} alt="list" className={styles.navicon} />
-          <img src={process.env.PUBLIC_URL + "/img/person.png"} alt="person" className={styles.navicon} />
-        </nav>
-      )}
     </div>
   );
 }

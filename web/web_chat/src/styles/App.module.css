@@ -8,26 +8,3 @@
   max-width: 400px;
   margin: 0 auto;
 }
-
-.navbar {
-  position: fixed;
-  left: 0;
-  bottom: 0;
-  width: 100vw;
-  max-width: 400px;
-  background: #fff;
-  border-top: 1px solid #eee;
-  display: flex;
-  justify-content: space-around;
-  padding: 12px 0;
-  z-index: 10;
-  box-shadow: 0 -2px 8px rgba(0,0,0,0.03);
-}
-.navicon {
-  opacity: 0.85;
-  transition: opacity 0.2s, transform 0.2s;
-}
-.navicon:hover {
-  opacity: 1;
-  transform: scale(1.15);
-}

@@ -2,37 +2,114 @@
   display: flex;
   align-items: center;
   cursor: pointer;
-  margin-bottom: 20px;
-  padding: 12px;
+  padding: 20px;
   border-radius: 16px;
   background: #fff;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-  transition: background 0.2s;
-  animation: fadeInUp 0.5s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: none;
+  gap: 16px;
+  opacity: 0;
+  animation-name: fadeIn;
+  animation-duration: 0.5s;
+  animation-timing-function: ease;
+  animation-fill-mode: forwards;
 }
+
 .item:hover {
-  background: #f0f4ff;
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  background: linear-gradient(to bottom right, #ffffff, #f8f9ff);
 }
+
+.item:active {
+  transform: translateY(-2px);
+}
+
+.item:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.2);
+}
+
 .avatar {
   width: 64px;
   height: 64px;
-  border-radius: 50%;
-  margin-right: 16px;
-  transition: transform 0.2s;
+  border-radius: 14px;
+  object-fit: contain;
+  flex-shrink: 0;
+  border: none;
+  background: #fff;
+  padding: 4px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
 .item:hover .avatar {
-  transform: scale(1.08) rotate(-5deg);
+  transform: scale(1.05) rotate(2deg);
 }
+
 .desc {
-  font-weight: bold;
+  font-weight: 500;
   font-size: 1.1em;
+  color: #1a1a1a;
+  margin-bottom: 6px;
+  line-height: 1.4;
+  transition: color 0.3s ease;
 }
+
+.item:hover .desc {
+  color: #4299E1;
+}
+
 .sub {
-  color: #888;
+  color: #666;
   font-size: 0.95em;
-  margin-top: 2px;
+  line-height: 1.5;
+  transition: color 0.3s ease;
 }
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(30px);}
-  to { opacity: 1; transform: translateY(0);}
+
+.item:hover .sub {
+  color: #4A5568;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.arrow {
+  color: #A0AEC0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
+}
+
+.item:hover .arrow {
+  color: #4299E1;
+  transform: translateX(6px);
+}
+
+@media (max-width: 768px) {
+  .item {
+    padding: 16px;
+    gap: 12px;
+  }
+  
+  .avatar {
+    width: 56px;
+    height: 56px;
+  }
+  
+  .desc {
+    font-size: 1.05em;
+  }
+  
+  .arrow {
+    width: 20px;
+    height: 20px;
+  }
 } 
