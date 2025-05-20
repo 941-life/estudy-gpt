@@ -167,11 +167,37 @@ function ChatRoom({ character, onBack }) {
 
   const getLevelAdjustedPrompt = (basePrompt) => {
     const level = LEVEL_ADJUSTMENTS[userLevel];
-    return `${basePrompt}\n\nIMPORTANT: Adjust your language to CEFR level ${userLevel}:\n` +
-      `- Use ${level.vocab}\n` +
-      `- Use ${level.grammar}\n` +
-      `- Keep sentences ${level.sentenceLength}\n` +
-      `- Focus on ${level.focus}`;
+    return `${basePrompt}\n\nIMPORTANT: Stay in character while following these guidelines:
+
+1. CHARACTER:
+- Maintain your personality traits and speech patterns
+- Use your characteristic expressions
+- Stay consistent with your character's style
+
+2. CONVERSATION:
+- Ask 2-3 follow-up questions per topic
+- Use questions matching your character's interests
+- Show curiosity in topics that fit your personality
+- Ask for details in your character's way
+
+3. LANGUAGE (CEFR ${userLevel}):
+- Use ${level.vocab}
+- Use ${level.grammar}
+- Keep sentences ${level.sentenceLength}
+- Focus on ${level.focus}
+
+4. TOPICS:
+- Discuss topics your character cares about
+- Share your character's perspective
+- Ask questions reflecting your character's interests
+- Build on responses while staying in character
+
+5. CORRECTIONS:
+- Focus on major errors only
+- Rephrase mistakes while staying in character
+- Keep the conversation natural
+
+Goal: Maintain character while helping practice English.`;
   };
 
   useEffect(() => {
@@ -199,9 +225,13 @@ function ChatRoom({ character, onBack }) {
   const analyzeChat = async (messages) => {
     try {
       const userMessages = messages.filter(msg => msg.role === 'user').map(msg => msg.content);
-      const criteria = CEFR_CRITERIA[userLevel];
       
-      const prompt = `You are a friendly English conversation partner analyzing a casual chat. Your role is to evaluate the user's English proficiency and provide constructive feedback.
+      const uid = auth.currentUser.uid;
+      const userRef = ref(db, `users/${uid}`);
+      const snapshot = await get(userRef);
+      const currentLevel = snapshot.exists() ? snapshot.val().cefrLevel : 'A1';
+      
+      const prompt = `You are a friendly English conversation partner analyzing a casual chat. Your role is to evaluate the user's English and provide constructive feedback.
 
       IMPORTANT GUIDELINES FOR ERROR CORRECTION:
       - DO NOT correct casual expressions like "plz", "thx", "gonna", "wanna", etc.
@@ -210,10 +240,6 @@ function ChatRoom({ character, onBack }) {
       - DO NOT correct informal/conversational grammar that native speakers commonly use
       - Only correct clear mistakes that affect understanding or are definitely wrong
       - Focus on helping them communicate more naturally, not on strict grammar rules
-
-      CURRENT LEVEL CRITERIA (${userLevel}):
-      ${criteria.criteria.map(c => `- ${c}`).join('\n')}
-      Score range: ${criteria.score[0]}-${criteria.score[1]}
 
       IMPORTANT: Respond ONLY with valid JSON, no other text.
       Format your response exactly like this:
@@ -225,9 +251,7 @@ function ChatRoom({ character, onBack }) {
             "explanation": "friendly explanation focusing on natural communication (2 lines max)"
           }
         ],
-        "summary": "encouraging feedback about their communication style and specific areas for improvement (2-3 lines)",
-        "score": number between ${criteria.score[0]} and ${criteria.score[1]},
-        "cefrLevel": "${userLevel}"
+        "summary": "encouraging feedback about their communication style and specific areas for improvement (2-3 lines)"
       }
 
       Analyze these messages:
@@ -250,51 +274,17 @@ function ChatRoom({ character, onBack }) {
         if (!parsedAnalysis.summary || typeof parsedAnalysis.summary !== 'string') {
           throw new Error('Invalid summary format');
         }
-        if (!parsedAnalysis.score || typeof parsedAnalysis.score !== 'number') {
-          throw new Error('Invalid score format');
-        }
-        if (!parsedAnalysis.cefrLevel || !['A1', 'A2', 'B1', 'B2', 'C1', 'C2'].includes(parsedAnalysis.cefrLevel)) {
-          throw new Error('Invalid CEFR level format');
-        }
 
-        let previousCefrLevel = null;
-        try {
-          const uid = auth.currentUser.uid;
-          const userRef = ref(db, `users/${uid}`);
-          const snapshot = await get(userRef);
-          if (snapshot.exists()) {
-            previousCefrLevel = snapshot.val().cefrLevel;
-          }
-        } catch (error) {
-          console.error('Error fetching previous CEFR level:', error);
-        }
+        const correctionCount = parsedAnalysis.corrections.length;
+        const score = Math.max(0, 100 - (correctionCount * 10));
 
-        try {
-          const uid = auth.currentUser.uid;
-          const userRef = ref(db, `users/${uid}`);
-          await update(userRef, {
-            cefrLevel: parsedAnalysis.cefrLevel,
-            lastUpdated: Date.now()
-          });
-        } catch (error) {
-          console.error('Error updating CEFR level:', error);
-        }
-
-        try {
-          await updateChatAnalysis(chatId, {
-            ...parsedAnalysis,
-            messages: messages.filter(msg => msg.role === 'user').map(msg => ({
-              content: msg.content,
-              timestamp: msg.timestamp
-            }))
-          });
-        } catch (error) {
-          console.error('Error saving chat analysis:', error);
-        }
+        const newLevel = await checkAndUpdateCEFRLevel(score);
 
         return {
           ...parsedAnalysis,
-          previousCefrLevel
+          score,
+          previousCefrLevel: currentLevel,
+          newCefrLevel: newLevel
         };
       } catch (e) {
         console.error('Failed to parse analysis response:', e);
@@ -302,14 +292,102 @@ function ChatRoom({ character, onBack }) {
           corrections: [],
           summary: "분석 결과를 파싱하는데 실패했습니다. 다시 시도해주세요.",
           score: 0,
-          cefrLevel: "A1",
-          previousCefrLevel: null
+          previousCefrLevel: currentLevel,
+          newCefrLevel: currentLevel
         };
       }
     } catch (error) {
       console.error('Error analyzing chat:', error);
       throw error;
     }
+  };
+
+  const checkAndUpdateCEFRLevel = async (score) => {
+    try {
+      const uid = auth.currentUser.uid;
+      const userRef = ref(db, `users/${uid}`);
+      const snapshot = await get(userRef);
+      
+      if (!snapshot.exists()) return 'A1';
+
+      const userData = snapshot.val();
+      const recentScores = userData.recentScores || [];
+      const totalSessions = userData.totalSessions || 0;
+      
+      recentScores.push({
+        score,
+        timestamp: Date.now()
+      });
+
+      if (recentScores.length > 10) {
+        recentScores.shift();
+      }
+
+      let newLevel = userData.cefrLevel;
+      const isInitialStage = totalSessions < 20;
+
+      if (isInitialStage) {
+        if (userData.cefrLevel === 'A1') {
+          const highScores = recentScores.filter(s => s.score >= 60);
+          if (highScores.length >= 2) {
+            newLevel = 'A2';
+          }
+        } else {
+          const highScores = recentScores.filter(s => s.score >= 90);
+          if (highScores.length >= 9) {
+            newLevel = getNextLevel(userData.cefrLevel);
+          }
+          const lowScores = recentScores.filter(s => s.score <= 50);
+          if (lowScores.length >= 6) {
+            newLevel = getPreviousLevel(userData.cefrLevel);
+          }
+        }
+      } else {
+        const highScores = recentScores.filter(s => s.score >= 80);
+        if (highScores.length >= 4) {
+          newLevel = getNextLevel(userData.cefrLevel);
+        }
+        const lowScores = recentScores.filter(s => s.score <= 60);
+        if (lowScores.length >= 3) {
+          newLevel = getPreviousLevel(userData.cefrLevel);
+        }
+      }
+
+      if (newLevel !== userData.cefrLevel) {
+        await update(userRef, {
+          cefrLevel: newLevel,
+          recentScores,
+          totalSessions: totalSessions + 1,
+          levelHistory: [...(userData.levelHistory || []), {
+            level: newLevel,
+            changedAt: Date.now(),
+            reason: newLevel > userData.cefrLevel ? 'upgrade' : 'downgrade'
+          }]
+        });
+      } else {
+        await update(userRef, {
+          recentScores,
+          totalSessions: totalSessions + 1
+        });
+      }
+
+      return newLevel;
+    } catch (error) {
+      console.error('Error updating CEFR level:', error);
+      return 'A1';
+    }
+  };
+
+  const getNextLevel = (currentLevel) => {
+    const levels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+    const currentIndex = levels.indexOf(currentLevel);
+    return currentIndex < levels.length - 1 ? levels[currentIndex + 1] : currentLevel;
+  };
+
+  const getPreviousLevel = (currentLevel) => {
+    const levels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+    const currentIndex = levels.indexOf(currentLevel);
+    return currentIndex > 0 ? levels[currentIndex - 1] : currentLevel;
   };
 
   const handleSendMessage = async (message) => {
@@ -415,7 +493,7 @@ function ChatRoom({ character, onBack }) {
               className={`${styles.completeBtn} ${isCompleting ? styles.completing : ''}`}
               disabled={!chatId || isCompleting}
           >
-            {isCompleting ? "처리 중..." : "채팅 종료"}
+            {isCompleting ? "처리 중..." : "오답 노트"}
           </button>
         </div>
         <div className={styles.messages}>

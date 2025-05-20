@@ -12,7 +12,7 @@ function AnalysisModal({ analysis, onClose }) {
     { level: 'C1', color: '#3498db' },
     { level: 'C2', color: '#9b59b6' }
   ];
-  const currentLevelIndex = levels.findIndex(l => l.level === analysis.cefrLevel);
+  const currentLevelIndex = levels.findIndex(l => l.level === analysis.newCefrLevel);
 
   return (
     <div className={styles.modalOverlay}>
@@ -40,9 +40,9 @@ function AnalysisModal({ analysis, onClose }) {
                 </div>
               ))}
             </div>
-            {analysis.previousCefrLevel && analysis.previousCefrLevel !== analysis.cefrLevel && (
+            {analysis.previousCefrLevel && analysis.previousCefrLevel !== analysis.newCefrLevel && (
               <div className={styles.levelChange}>
-                Level changed from {analysis.previousCefrLevel} to {analysis.cefrLevel}
+                Level changed from {analysis.previousCefrLevel} to {analysis.newCefrLevel}
               </div>
             )}
           </div>

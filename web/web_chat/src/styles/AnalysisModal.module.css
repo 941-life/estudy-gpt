@@ -248,7 +248,6 @@
   font-size: 1rem;
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
   .modalContent {
     width: 95%;
