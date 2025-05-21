@@ -1,5 +1,6 @@
 import 'package:estudy_gpt/screens/personal_screen.dart';
 import 'package:estudy_gpt/screens/profile_screen.dart';
+import 'package:estudy_gpt/screens/wrong_note_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
@@ -45,12 +46,12 @@ class _MainScreenState extends State<MainScreen> {
         initialUrl: 'https://estudy-5b2ba.web.app/',
         onTitleChanged: (_) => setState(() => _webTitle = 'Chat'),
       ),
-      WebViewBridge(
-        key: const ValueKey('webview_wrong_note'),
-        user: widget.user,
-        initialUrl: 'https://estudy-5b2ba.web.app/',
-        onTitleChanged: (_) => setState(() => _webTitle = 'Wrong note'),
-      ),
+      // WebViewBridge(
+      //   key: const ValueKey('webview_wrong_note'),
+      //   user: widget.user,
+      //   initialUrl: 'https://estudy-5b2ba.web.app/',
+      //   onTitleChanged: (_) => setState(() => _webTitle = 'Wrong note'),
+      // ),
     ];
   }
 
@@ -116,7 +117,8 @@ class _MainScreenState extends State<MainScreen> {
     } else if (_selectedIndex == 1) {
       return _webViews[0];
     } else if (_selectedIndex == 2) {
-      return _webViews[1];
+      // return _webViews[1];
+      return WrongNoteScreen();
     } else if (_selectedIndex == 3) {
       return ProfileScreen();
     } else {
