@@ -23,7 +23,7 @@ class WebViewBridge extends StatefulWidget {
 
 class _WebViewBridgeState extends State<WebViewBridge> {
   late final WebViewController _controller;
-  String _pageTitle = 'WebView Page';
+  String _pageTitle = '';
 
   @override
   void initState() {
