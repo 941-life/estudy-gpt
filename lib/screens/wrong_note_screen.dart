@@ -8,6 +8,8 @@ class WrongNoteScreen extends StatelessWidget {
   Future<List<Map<String, dynamic>>> _fetchWrongNotes() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return [];
+    //  final dbRef = FirebaseDatabase.instance.ref('users/${user.uid}/wrongNote');
+
     final dbRef = FirebaseDatabase.instance.ref(
       'users/6aXZoouLskON99JvBbqflAZXy5u1/wrongNote',
     );
@@ -17,11 +19,13 @@ class WrongNoteScreen extends StatelessWidget {
 
     List<Map<String, dynamic>> notes = [];
     for (final child in snapshot.children) {
-      final value = child.value as Map<dynamic, dynamic>;
-      notes.add({
-        'id': child.key,
-        ...value.map((k, v) => MapEntry(k.toString(), v)),
-      });
+      final value = child.value;
+      if (value is Map<dynamic, dynamic>) {
+        notes.add({
+          'id': child.key,
+          ...value.map((k, v) => MapEntry(k.toString(), v)),
+        });
+      }
     }
     return notes;
   }
@@ -29,7 +33,7 @@ class WrongNoteScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('오답노트')),
+      // appBar: AppBar(title: const Text('오답노트')),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: _fetchWrongNotes(),
         builder: (context, snapshot) {
@@ -37,7 +41,7 @@ class WrongNoteScreen extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            return const Center(child: Text('오답노트를 불러올 수 없습니다.'));
+            return Center(child: Text('오답노트를 불러올 수 없습니다.\n${snapshot.error}'));
           }
           final notes = snapshot.data ?? [];
           if (notes.isEmpty) {
@@ -51,71 +55,245 @@ class WrongNoteScreen extends StatelessWidget {
                   (note['messages'] as List<dynamic>?)
                       ?.map((m) => m['content']?.toString() ?? '')
                       .toList();
-              final corrections =
-                  (note['corrections'] as List<dynamic>?)
-                      ?.map((c) => c.toString())
-                      .toList();
+              final corrections = note['corrections'] as List<dynamic>?;
 
               return Card(
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                elevation: 4,
+                margin: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18),
+                ),
                 child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(18.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        '오답노트 ID: ${note['id']}',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                          color: Colors.grey,
+                      // 상단 뱃지 영역
+                      Row(
+                        children: [
+                          if (note['previousCefrLevel'] != null &&
+                              note['newCefrLevel'] != null)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              margin: const EdgeInsets.only(right: 8),
+                              decoration: BoxDecoration(
+                                color: Colors.blue.shade50,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                '레벨: ${note['previousCefrLevel']} → ${note['newCefrLevel']}',
+                                style: const TextStyle(
+                                  color: Colors.blue,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          if (note['score'] != null)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              margin: const EdgeInsets.only(right: 8),
+                              decoration: BoxDecoration(
+                                color: Colors.green.shade50,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                '점수: ${note['score']}',
+                                style: const TextStyle(
+                                  color: Colors.green,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          if (note['analyzedAt'] != null)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade200,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                '분석일: ${(note['analyzedAt'] as String).split("T").first}',
+                                style: const TextStyle(
+                                  color: Colors.black54,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      // 수정 사항 영역
+                      if (corrections != null && corrections.isNotEmpty)
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.orange.shade50,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          padding: const EdgeInsets.all(10),
+                          margin: const EdgeInsets.only(bottom: 8),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                '수정 사항',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                  color: Colors.deepOrange,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              ...corrections.map((cor) {
+                                if (cor is Map) {
+                                  return Container(
+                                    margin: const EdgeInsets.only(bottom: 8),
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                        color: Colors.orange.shade200,
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            const Text(
+                                              '원본: ',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.black87,
+                                              ),
+                                            ),
+                                            Text(
+                                              cor['original']?.toString() ?? '',
+                                              style: const TextStyle(
+                                                color: Colors.black87,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        Row(
+                                          children: [
+                                            const Text(
+                                              '수정: ',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.green,
+                                              ),
+                                            ),
+                                            Text(
+                                              cor['corrected']?.toString() ??
+                                                  '',
+                                              style: const TextStyle(
+                                                color: Colors.green,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        if (cor['explanation'] != null)
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                              top: 4,
+                                            ),
+                                            child: Row(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                const Icon(
+                                                  Icons.info_outline,
+                                                  size: 16,
+                                                  color: Colors.orange,
+                                                ),
+                                                const SizedBox(width: 4),
+                                                Expanded(
+                                                  child: Text(
+                                                    cor['explanation']
+                                                        .toString(),
+                                                    style: const TextStyle(
+                                                      color: Colors.orange,
+                                                      fontSize: 13,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  );
+                                } else {
+                                  // fallback for string or other type
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 2,
+                                    ),
+                                    child: Text('• $cor'),
+                                  );
+                                }
+                              }).toList(),
+                            ],
+                          ),
+                        ),
+                      // 요약 영역
+                      if (note['summary'] != null)
+                        Container(
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: Colors.yellow.shade100,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          padding: const EdgeInsets.all(12),
+                          margin: const EdgeInsets.only(top: 4),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Icon(
+                                Icons.lightbulb,
+                                color: Colors.amber,
+                                size: 22,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  note['summary'],
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      // 오답노트 ID (작게)
+                      Align(
+                        alignment: Alignment.bottomRight,
+                        child: Text(
+                          'ID: ${note['id']}',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey,
+                          ),
                         ),
                       ),
-                      if (note['analyzedAt'] != null)
-                        Text('분석일: ${note['analyzedAt']}'),
-                      if (note['score'] != null) Text('점수: ${note['score']}'),
-                      if (note['previousCefrLevel'] != null &&
-                          note['newCefrLevel'] != null)
-                        Text(
-                          '레벨 변화: ${note['previousCefrLevel']} → ${note['newCefrLevel']}',
-                        ),
-                      const SizedBox(height: 8),
-                      if (messages != null && messages.isNotEmpty)
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              '메시지:',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15,
-                              ),
-                            ),
-                            ...messages.map((msg) => Text('- $msg')),
-                          ],
-                        ),
-                      if (corrections != null && corrections.isNotEmpty)
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: 8),
-                            const Text(
-                              '수정 사항:',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15,
-                              ),
-                            ),
-                            ...corrections.map((cor) => Text('- $cor')),
-                          ],
-                        ),
-                      if (note['summary'] != null) ...[
-                        const SizedBox(height: 8),
-                        Text(
-                          '요약: ${note['summary']}',
-                          style: const TextStyle(color: Colors.black87),
-                        ),
-                      ],
                     ],
                   ),
                 ),
