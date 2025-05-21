@@ -21,8 +21,7 @@ export const initializeAuth = async () => {
   try {
     const userCredential = await signInAnonymously(auth);
     const uid = userCredential.user.uid;
-    
-    // 사용자 데이터가 없으면 초기화
+
     const userRef = ref(db, `users/${uid}`);
     const snapshot = await get(userRef);
     
@@ -90,9 +89,10 @@ export const updateChatAnalysis = async (chatId, analysis) => {
   try {
     const uid = auth.currentUser.uid;
     const analysisRef = ref(db, `users/${uid}/wrongNote/${chatId}`);
+    const now = new Date();
     await set(analysisRef, {
       ...analysis,
-      analyzedAt: Date.now()
+      analyzedAt: now.toISOString()
     });
   } catch (error) {
     console.error('Error updating chat analysis:', error.message);
