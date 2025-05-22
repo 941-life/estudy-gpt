@@ -1,4 +1,3 @@
-// 메소드 채널 텍스트 화면 (네이티브 코드에서 전달된 텍스트용)
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -9,47 +8,64 @@ class MethodChannelTextScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final width = size.width;
+    final height = size.height;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Method Channel 텍스트'),
+        title: Text(
+          'Method Channel 텍스트',
+          style: TextStyle(fontSize: width * 0.05),
+        ),
         backgroundColor: Colors.deepPurple,
         foregroundColor: Colors.white,
+        toolbarHeight: height * 0.08,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(width * 0.04),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'Method Channel로 전달받은 텍스트',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: width * 0.055,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            SizedBox(height: 24),
+            SizedBox(height: height * 0.03),
             Card(
               elevation: 4,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(width * 0.03),
               ),
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: EdgeInsets.all(width * 0.045),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     if (text.isEmpty)
                       Text(
                         '텍스트가 없습니다',
-                        style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                        style: TextStyle(
+                          fontSize: width * 0.04,
+                          color: Colors.grey[600],
+                        ),
                       )
                     else
-                      Text(text, style: TextStyle(fontSize: 18)),
-                    SizedBox(height: 16),
+                      Text(text, style: TextStyle(fontSize: width * 0.048)),
+                    SizedBox(height: height * 0.02),
                     if (text.isNotEmpty)
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           OutlinedButton.icon(
-                            icon: Icon(Icons.copy),
-                            label: Text('복사'),
+                            icon: Icon(Icons.copy, size: width * 0.06),
+                            label: Text(
+                              '복사',
+                              style: TextStyle(fontSize: width * 0.04),
+                            ),
                             onPressed: () {
                               Clipboard.setData(ClipboardData(text: text));
                               ScaffoldMessenger.of(context).showSnackBar(

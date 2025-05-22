@@ -8,11 +8,13 @@ import 'dart:async';
 class WebViewBridge extends StatefulWidget {
   final User? user;
   final String initialUrl;
+  final void Function(String)? onTitleChanged; // 추가
 
   const WebViewBridge({
     super.key,
     required this.user,
     required this.initialUrl,
+    this.onTitleChanged, // 추가
   });
 
   @override
@@ -21,12 +23,12 @@ class WebViewBridge extends StatefulWidget {
 
 class _WebViewBridgeState extends State<WebViewBridge> {
   late final WebViewController _controller;
+  String _pageTitle = '';
 
   @override
   void initState() {
     super.initState();
 
-    // UID 파라미터가 포함된 URL 생성
     final initialUri = Uri.parse(widget.initialUrl);
 
     _controller =
@@ -41,12 +43,22 @@ class _WebViewBridgeState extends State<WebViewBridge> {
           ..setUserAgent('Mozilla/5.0')
           ..setNavigationDelegate(
             NavigationDelegate(
-              onPageFinished: (String url) {
+              onPageFinished: (String url) async {
                 _sendUserDataToReact();
+                // 페이지 타이틀 가져오기
+                final title = await _controller.getTitle();
+                if (title != null && title.isNotEmpty) {
+                  setState(() {
+                    _pageTitle = title;
+                  });
+                  if (widget.onTitleChanged != null) {
+                    widget.onTitleChanged!(title);
+                  }
+                }
               },
             ),
           )
-          ..loadRequest(initialUri); // 수정된 URL 사용
+          ..loadRequest(initialUri);
   }
 
   Future<void> _sendUserDataToReact() async {
@@ -67,9 +79,7 @@ class _WebViewBridgeState extends State<WebViewBridge> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('WebView Page'), // 앱 바 유지
-      ),
+      // appBar: AppBar(title: Text(_pageTitle)),
       body: WebViewWidget(controller: _controller),
     );
   }

@@ -18,61 +18,85 @@ class LoginScreen extends StatelessWidget {
         idToken: googleAuth.idToken,
       );
 
-      // 로그인
       final userCredential = await FirebaseAuth.instance.signInWithCredential(
         credential,
       );
       final uid = userCredential.user!.uid;
 
-      // Realtime Database 폴더 생성 (존재하지 않는 경우만)
       final dbRef = FirebaseDatabase.instance.ref('users/$uid');
       final snapshot = await dbRef.get();
 
-      Map<String, dynamic> updates = {};
+      if (!snapshot.exists) {
+        await dbRef.set({
+          'cefrLevel': 'A1',
+          'createdAt': ServerValue.timestamp,
+          'totalSessions': 0,
+          'recentScores': [],
+          'chat': {
+            'Conversation': {'createdAt': ServerValue.timestamp},
+          },
+          'wrongNote': {},
+          'Vocabulary': {'createdAt': ServerValue.timestamp},
+          'Context': {'createdAt': ServerValue.timestamp},
+        });
+      } else {
+        Map<String, dynamic> updates = {};
+        if (!snapshot.hasChild('Conversation') && !snapshot.hasChild('chat')) {
+          updates['chat/Conversation'] = {'createdAt': ServerValue.timestamp};
+        }
+        if (!snapshot.hasChild('Vocabulary')) {
+          updates['Vocabulary'] = {'createdAt': ServerValue.timestamp};
+        }
+        if (!snapshot.hasChild('Context')) {
+          updates['Context'] = {'createdAt': ServerValue.timestamp};
+        }
+        if (updates.isNotEmpty) {
+          await dbRef.update(updates);
+        }
+      }
 
-      // 각 폴더 존재 여부 확인
-      if (!snapshot.hasChild('Conversation')) {
-        updates['Conversation'] = {'createdAt': ServerValue.timestamp};
+      if (context.mounted) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MainScreen(user: userCredential.user!),
+          ),
+          (route) => false,
+        );
       }
-      if (!snapshot.hasChild('Vocabulary')) {
-        updates['Vocabulary'] = {'createdAt': ServerValue.timestamp};
-      }
-      if (!snapshot.hasChild('Context')) {
-        updates['Context'] = {'createdAt': ServerValue.timestamp};
-      }
-
-      // 필요한 경우에만 업데이트
-      if (updates.isNotEmpty) {
-        await dbRef.update(updates);
-      }
-
-      // 네비게이션
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(
-          builder: (context) => MainScreen(user: userCredential.user!),
-        ),
-        (route) => false,
-      );
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('로그인 실패: $e')));
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('로그인 실패: $e')));
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final width = size.width;
+    final height = size.height;
+
     return Scaffold(
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text('로그인이 필요합니다', style: TextStyle(fontSize: 20)),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () => _handleGoogleSignIn(context),
-              child: const Text('Google로 로그인'),
+            Text('로그인이 필요합니다', style: TextStyle(fontSize: width * 0.055)),
+            SizedBox(height: height * 0.03),
+            SizedBox(
+              width: width * 0.7,
+              height: height * 0.07,
+              child: ElevatedButton(
+                onPressed: () => _handleGoogleSignIn(context),
+                style: ElevatedButton.styleFrom(
+                  textStyle: TextStyle(fontSize: width * 0.045),
+                  padding: EdgeInsets.symmetric(vertical: height * 0.02),
+                ),
+                child: const Text('Google로 로그인'),
+              ),
             ),
           ],
         ),
