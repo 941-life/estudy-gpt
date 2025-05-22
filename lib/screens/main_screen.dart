@@ -46,12 +46,6 @@ class _MainScreenState extends State<MainScreen> {
         initialUrl: 'https://estudy-5b2ba.web.app/',
         onTitleChanged: (_) => setState(() => _webTitle = 'Chat'),
       ),
-      // WebViewBridge(
-      //   key: const ValueKey('webview_wrong_note'),
-      //   user: widget.user,
-      //   initialUrl: 'https://estudy-5b2ba.web.app/',
-      //   onTitleChanged: (_) => setState(() => _webTitle = 'Wrong note'),
-      // ),
     ];
   }
 
@@ -66,7 +60,6 @@ class _MainScreenState extends State<MainScreen> {
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
-      // 탭 전환 시 타이틀을 즉시 반영
       if (index == 1) {
         _webTitle = 'Chat';
       } else if (index == 2) {
@@ -77,6 +70,10 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final width = size.width;
+    final height = size.height;
+
     return Scaffold(
       appBar:
           (_selectedIndex == 1 || _selectedIndex == 2)
@@ -85,26 +82,31 @@ class _MainScreenState extends State<MainScreen> {
                   _webTitle.isNotEmpty
                       ? _webTitle
                       : (_selectedIndex == 1 ? 'Chat' : 'Wrong note'),
+                  style: TextStyle(fontSize: width * 0.05),
                 ),
+                toolbarHeight: height * 0.08,
               )
               : null,
-      body: _buildBody(),
-      bottomNavigationBar: _buildBottomNavBar(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const CalendarScreen()),
-          );
-        },
-        child: const Icon(Icons.calendar_today),
-        tooltip: 'Open Calendar',
+      body: _buildBody(width, height),
+      bottomNavigationBar: _buildBottomNavBar(width, height),
+      floatingActionButton: SizedBox(
+        width: width * 0.16,
+        height: width * 0.16,
+        child: FloatingActionButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const CalendarScreen()),
+            );
+          },
+          child: Icon(Icons.calendar_today, size: width * 0.08),
+          tooltip: 'Open Calendar',
+        ),
       ),
     );
   }
 
-  Widget _buildBody() {
-    // 로그인 체크
+  Widget _buildBody(double width, double height) {
     if (widget.user == null) {
       return const LoginScreen();
     }
@@ -117,7 +119,6 @@ class _MainScreenState extends State<MainScreen> {
     } else if (_selectedIndex == 1) {
       return _webViews[0];
     } else if (_selectedIndex == 2) {
-      // return _webViews[1];
       return WrongNoteScreen();
     } else if (_selectedIndex == 3) {
       return ProfileScreen();
@@ -126,19 +127,34 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
-  BottomNavigationBar _buildBottomNavBar() {
+  BottomNavigationBar _buildBottomNavBar(double width, double height) {
     return BottomNavigationBar(
       currentIndex: _selectedIndex,
       onTap: _onItemTapped,
       type: BottomNavigationBarType.fixed,
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: '홈'),
-        BottomNavigationBarItem(icon: Icon(Icons.school), label: '학습'),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: '오답노트'),
-        BottomNavigationBarItem(icon: Icon(Icons.abc_rounded), label: '프로필'),
+      items: [
+        BottomNavigationBarItem(
+          icon: Icon(Icons.home, size: width * 0.07),
+          label: '홈',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.school, size: width * 0.07),
+          label: '학습',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.person, size: width * 0.07),
+          label: '오답노트',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.abc_rounded, size: width * 0.07),
+          label: '프로필',
+        ),
       ],
       selectedItemColor: Colors.blue,
       unselectedItemColor: Colors.grey,
+      selectedFontSize: width * 0.035,
+      unselectedFontSize: width * 0.03,
+      iconSize: width * 0.07,
     );
   }
 }
