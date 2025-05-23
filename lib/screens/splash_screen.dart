@@ -50,7 +50,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFB2EBE0), // 이미지와 어울리는 민트색 배경
+      backgroundColor: const Color(0xFFFFFFFF),
       body: Center(
         child: AnimatedBuilder(
           animation: _controller,
