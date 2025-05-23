@@ -16,12 +16,19 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
       margin: const EdgeInsets.only(top: 4),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border(
+        border: const Border(
           bottom: BorderSide(
             color: Color(0xFFE0E0E0), // 연한 회색, 필요시 색상 조정
             width: 1, // 선 두께
           ),
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 2,
+            offset: const Offset(0, 1),
+          ),
+        ],
       ),
       child: SafeArea(
         bottom: false,

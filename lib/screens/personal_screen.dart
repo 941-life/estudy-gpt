@@ -378,6 +378,7 @@ class _PersonalScreenState extends State<PersonalScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const CommonAppBar(title: 'Home'),
+      backgroundColor: Colors.white,
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _contentType == ContentType.text
