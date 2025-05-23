@@ -103,7 +103,7 @@ const LEVEL_ADJUSTMENTS = {
   }
 };
 
-function ChatRoom({ character, onBack }) {
+function ChatRoom({ character, onBack, userData }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -115,6 +115,8 @@ function ChatRoom({ character, onBack }) {
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
   const [userLevel, setUserLevel] = useState("A1");
+  const [showAuthError, setShowAuthError] = useState(false);
+  const [authError, setAuthError] = useState('');
   const chatEndRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -122,10 +124,22 @@ function ChatRoom({ character, onBack }) {
     const initAuth = async () => {
       setIsInitializing(true);
       try {
-        await initializeAuth();
-        setIsAuthReady(true);
+        if (userData && userData.email) {
+          await initializeAuth(userData);
+          setIsAuthReady(true);
+          
+          if (window.FlutterBridge) {
+            window.FlutterBridge.postMessage(JSON.stringify({
+              type: 'auth:status',
+              status: 'authenticated',
+              uid: userData.uid
+            }));
+          }
+        } else {
+          throw new Error('User data is required for authentication');
+        }
 
-        const uid = auth.currentUser.uid;
+        const uid = userData.uid;
         const userRef = ref(db, `users/${uid}`);
         const snapshot = await get(userRef);
         if (snapshot.exists()) {
@@ -136,12 +150,22 @@ function ChatRoom({ character, onBack }) {
         }
       } catch (error) {
         console.error('인증 초기화 중 오류:', error);
+        setAuthError(error.message);
+        setShowAuthError(true);
+        if (window.FlutterBridge) {
+          window.FlutterBridge.postMessage(JSON.stringify({
+            type: 'auth:status',
+            status: 'error',
+            error: error.message,
+            uid: userData?.uid
+          }));
+        }
       } finally {
         setIsInitializing(false);
       }
     };
     initAuth();
-  }, []);
+  }, [userData]);
 
   const removeMarkdown = (text) => {
     return text
@@ -469,6 +493,29 @@ Goal: Maintain character while helping practice English.`;
       handleSendMessage(input);
     }
   };
+
+  const AuthErrorPopup = () => (
+    <div className={styles.errorPopup}>
+      <div className={styles.errorContent}>
+        <h3>인증 오류</h3>
+        <p>{authError}</p>
+        <button onClick={() => {
+          setShowAuthError(false);
+          onBack();
+        }}>
+          확인
+        </button>
+      </div>
+    </div>
+  );
+
+  if (!isAuthReady || showAuthError) {
+    return (
+      <div className={styles.container}>
+        {showAuthError && <AuthErrorPopup />}
+      </div>
+    );
+  }
 
   if (isInitializing) {
     return (

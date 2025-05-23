@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getDatabase, ref, push, set, get } from 'firebase/database';
-import { getAuth, signInAnonymously } from 'firebase/auth';
+import { getAuth } from 'firebase/auth';
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
@@ -17,11 +17,13 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 
-export const initializeAuth = async () => {
+export const initializeAuth = async (userData) => {
   try {
-    const userCredential = await signInAnonymously(auth);
-    const uid = userCredential.user.uid;
+    if (!userData || !userData.uid) {
+      throw new Error('User ID is required');
+    }
 
+    const uid = userData.uid;
     const userRef = ref(db, `users/${uid}`);
     const snapshot = await get(userRef);
     
@@ -30,13 +32,16 @@ export const initializeAuth = async () => {
         cefrLevel: 'A1',
         createdAt: Date.now(),
         totalSessions: 0,
-        recentScores: []
+        recentScores: [],
+        email: userData.email,
+        displayName: userData.displayName,
+        photoUrl: userData.photoUrl
       });
     }
     
     return uid;
   } catch (error) {
-    console.error('Error initializing anonymous auth:', error);
+    console.error('Error initializing auth:', error);
     throw error;
   }
 };
