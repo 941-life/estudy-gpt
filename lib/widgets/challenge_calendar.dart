@@ -50,8 +50,88 @@ class _ChallengeCalendarState extends State<ChallengeCalendar> {
     });
   }
 
+  bool _hasCreatedTodayNote() {
+    final now = DateTime.now();
+    return _hasWrongNotesForDate(now);
+  }
+
+  String _getMotivationalMessage(bool hasCreatedNote) {
+    if (hasCreatedNote) {
+      final messages = [
+        '오늘의 학습을 완료했어요! 대단해요! 🎉',
+        '훌륭해요! 오늘도 성장하는 하루였어요! ✨',
+        '학습 목표 달성! 내일도 이 기세로! 🌟'
+      ];
+      return messages[DateTime.now().microsecond % messages.length];
+    } else {
+      final messages = [
+        '아직 오늘의 학습을 시작하지 않았어요!',
+        '새로운 도전이 기다리고 있어요!',
+        '오늘의 학습으로 한 걸음 더 성장해보세요!'
+      ];
+      return messages[DateTime.now().microsecond % messages.length];
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Card(
+          elevation: 2,
+          margin: const EdgeInsets.all(16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      widget.title,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.shade50,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Text(
+                        'Nice pace!',
+                        style: TextStyle(
+                          color: Colors.blue,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                _buildCalendarGrid(),
+              ],
+            ),
+          ),
+        ),
+        _buildTodayTask(),
+      ],
+    );
+  }
+
+  Widget _buildTodayTask() {
+    final hasCreatedNote = _hasCreatedTodayNote();
+    final motivationalMessage = _getMotivationalMessage(hasCreatedNote);
+
     return Card(
       elevation: 2,
       margin: const EdgeInsets.all(16),
@@ -61,40 +141,58 @@ class _ChallengeCalendarState extends State<ChallengeCalendar> {
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  widget.title,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.shade50,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Text(
-                    'Nice pace!',
-                    style: TextStyle(
-                      color: Colors.blue,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
+            const Text(
+              "Today's Task",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            const SizedBox(height: 20),
-            _buildCalendarGrid(),
+            const SizedBox(height: 16),
+            Center(
+              child: Image.asset(
+                hasCreatedNote ? 'assets/images/thumbup.png' : 'assets/images/sad.png',
+                height: 120,
+                width: 120,
+                fit: BoxFit.contain,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              motivationalMessage,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 16,
+                height: 1.4,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.2,
+              ),
+            ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildChip(String label) {
+    final hasCreatedNote = _hasCreatedTodayNote();
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: hasCreatedNote ? Colors.green.shade50 : Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: hasCreatedNote ? Colors.green.shade200 : Colors.grey.shade200,
+        ),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 13,
+          color: hasCreatedNote ? Colors.green.shade700 : Colors.black87,
         ),
       ),
     );
