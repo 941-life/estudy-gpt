@@ -4,6 +4,7 @@ import 'package:firebase_database/firebase_database.dart';
 import '../models/wrong_note.dart';
 import '../widgets/challenge_calendar.dart';
 import '../widgets/today_task_card.dart';
+import '../widgets/common_app_bar.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -228,7 +229,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final user = FirebaseAuth.instance.currentUser;
 
     return Scaffold(
-      appBar: null,
+      appBar: const CommonAppBar(title: 'Profile'),
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Column(

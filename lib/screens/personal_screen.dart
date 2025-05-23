@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:estudy_gpt/widgets/markdown_widget.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:estudy_gpt/widgets/common_app_bar.dart';
 
 import 'package:flutter/material.dart';
 import 'package:estudy_gpt/models/shared_data.dart';
@@ -375,44 +376,16 @@ class _PersonalScreenState extends State<PersonalScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return _buildMainScreen();
-  }
-
-  Widget _buildMainScreen() {
     return Scaffold(
-      appBar: null,
-      body: _isLoading && !_isProcessingFile
+      appBar: const CommonAppBar(title: 'Home'),
+      body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : _buildCurrentContent(),
-      backgroundColor: Colors.white,
+          : _contentType == ContentType.text
+              ? _buildTextContent()
+              : _contentType == ContentType.document
+                  ? _buildDocumentContent()
+                  : _buildEmptyState(),
     );
-  }
-
-  Widget _buildCurrentContent() {
-    if (_isProcessingFile) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    switch (_contentType) {
-      case ContentType.text:
-        return _buildTextContent();
-      case ContentType.document:
-        return _buildDocumentContent();
-      case ContentType.unknown:
-      default:
-        if (widget.sharedFiles.isNotEmpty) {
-          return _buildUnsupportedFilesContent();
-        } else {
-          return Center(
-            child: Text(
-              _detectedLang == 'ko'
-                  ? '공유된 내용이 없습니다'
-                  : 'No shared content found.',
-              style: const TextStyle(fontSize: 18, color: Colors.grey),
-            ),
-          );
-        }
-    }
   }
 
   Widget _buildTextContent() {
@@ -798,5 +771,16 @@ class _PersonalScreenState extends State<PersonalScreen> {
         _otherController.clear();
       }
     });
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Text(
+        _detectedLang == 'ko'
+            ? '공유된 내용이 없습니다'
+            : 'No shared content found.',
+        style: const TextStyle(fontSize: 18, color: Colors.grey),
+      ),
+    );
   }
 }

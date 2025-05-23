@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:estudy_gpt/widgets/common_app_bar.dart';
 
 class WrongNoteScreen extends StatelessWidget {
   const WrongNoteScreen({super.key});
@@ -36,7 +37,7 @@ class WrongNoteScreen extends StatelessWidget {
     final height = size.height;
 
     return Scaffold(
-      appBar: null,
+      appBar: const CommonAppBar(title: 'Review'),
       backgroundColor: Colors.white,
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: _fetchWrongNotes(),
