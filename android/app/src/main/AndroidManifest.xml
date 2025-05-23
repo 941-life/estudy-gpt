@@ -101,17 +101,6 @@
 
         </activity>
 
-
-        <receiver android:name=".HomeCalendarWidgetProvider" android:exported="true">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
-            </intent-filter>
-
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/calendar_widget_info"/>
-        </receiver>
-
         <receiver android:name=".ChallengeCalendarWidgetProvider"
             android:exported="true">
             <intent-filter>
@@ -126,12 +115,6 @@
             android:name=".CalendarGridService"
             android:permission="android.permission.BIND_REMOTEVIEWS"
             android:exported = "false" />
-
-         <!-- <service
-            android:name=".CalendarWidgetService"
-            android:permission="android.permission.BIND_REMOTEVIEWS"
-            android:exported = "false" />    -->
-
 
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->

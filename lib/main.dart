@@ -162,18 +162,8 @@ class _AppContentState extends State<AppContent> {
   }
 
   Future<void> _initializeApp() async {
-    await _initWidget();
     _initSharing();
     _addTestData();
-  }
-
-  Future<void> _initWidget() async {
-    try {
-      await Event.updateCalendarWidget(events);
-      debugPrint('위젯 업데이트 성공: ${events.length}개 이벤트');
-    } catch (e) {
-      _showErrorDialog('위젯 초기화 실패', e.toString());
-    }
   }
 
   void _addTestData() {
@@ -186,9 +176,6 @@ class _AppContentState extends State<AppContent> {
             title: "플러터 프로젝트 마감",
           ),
         ]);
-      });
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        Event.updateCalendarWidget(events);
       });
     }
   }
