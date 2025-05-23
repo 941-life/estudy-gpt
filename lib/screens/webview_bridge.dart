@@ -79,6 +79,7 @@ class _WebViewBridgeState extends State<WebViewBridge> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: WebViewWidget(controller: _controller),
       ),

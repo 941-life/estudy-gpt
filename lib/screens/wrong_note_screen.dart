@@ -37,6 +37,7 @@ class WrongNoteScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: null,
+      backgroundColor: Colors.white,
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: _fetchWrongNotes(),
         builder: (context, snapshot) {
@@ -61,7 +62,7 @@ class WrongNoteScreen extends StatelessWidget {
               final corrections = note['corrections'] as List<dynamic>?;
 
               return Card(
-                elevation: 4,
+                elevation: 2,
                 margin: EdgeInsets.symmetric(
                   horizontal: width * 0.04,
                   vertical: height * 0.012,

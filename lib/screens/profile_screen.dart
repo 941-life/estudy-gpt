@@ -229,6 +229,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     return Scaffold(
       appBar: null,
+      backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -300,7 +301,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             ChallengeCalendar(
               title: _selectedChallenge,
-              currentDate: _today,
+              initialDate: _today,
               wrongNotes: _wrongNotes,
               onDateSelected: _showWrongNotesForDate,
             ),

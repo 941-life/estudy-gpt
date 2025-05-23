@@ -2,26 +2,107 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/wrong_note.dart';
 
-class ChallengeCalendar extends StatelessWidget {
+class ChallengeCalendar extends StatefulWidget {
   final String title;
-  final DateTime currentDate;
+  final DateTime initialDate;
   final Map<DateTime, List<WrongNote>> wrongNotes;
   final Function(DateTime) onDateSelected;
 
   const ChallengeCalendar({
     super.key,
     required this.title,
-    required this.currentDate,
+    required this.initialDate,
     required this.wrongNotes,
     required this.onDateSelected,
   });
 
+  @override
+  State<ChallengeCalendar> createState() => _ChallengeCalendarState();
+}
+
+class _ChallengeCalendarState extends State<ChallengeCalendar> {
+  late DateTime _currentDate;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentDate = widget.initialDate;
+  }
+
+  void _previousMonth() {
+    setState(() {
+      _currentDate = DateTime(_currentDate.year, _currentDate.month - 1, 1);
+    });
+  }
+
+  void _nextMonth() {
+    setState(() {
+      _currentDate = DateTime(_currentDate.year, _currentDate.month + 1, 1);
+    });
+  }
+
+  bool _hasWrongNotesForDate(DateTime date) {
+    return widget.wrongNotes.entries.any((entry) {
+      final noteDate = entry.key;
+      return noteDate.year == date.year && 
+             noteDate.month == date.month && 
+             noteDate.day == date.day;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 2,
+      margin: const EdgeInsets.all(16),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  widget.title,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Text(
+                    'Nice pace!',
+                    style: TextStyle(
+                      color: Colors.blue,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            _buildCalendarGrid(),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildCalendarGrid() {
-    // 현재 월의 첫 날과 마지막 날 계산
-    final firstDayOfMonth = DateTime(currentDate.year, currentDate.month, 1);
-    final lastDayOfMonth = DateTime(currentDate.year, currentDate.month + 1, 0);
-    
-    // 달력에 표시할 날짜 수 계산 (이전 월의 날짜 + 현재 월의 날짜)
+    final firstDayOfMonth = DateTime(_currentDate.year, _currentDate.month, 1);
+    final lastDayOfMonth = DateTime(_currentDate.year, _currentDate.month + 1, 0);
     final firstWeekday = firstDayOfMonth.weekday;
     final daysInMonth = lastDayOfMonth.day;
     
@@ -31,7 +112,7 @@ class ChallengeCalendar extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              DateFormat('MMMM yyyy').format(currentDate),
+              DateFormat('MMMM yyyy').format(_currentDate),
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
@@ -41,12 +122,12 @@ class ChallengeCalendar extends StatelessWidget {
               children: [
                 IconButton(
                   icon: const Icon(Icons.chevron_left),
-                  onPressed: () {},
+                  onPressed: _previousMonth,
                   iconSize: 20,
                 ),
                 IconButton(
                   icon: const Icon(Icons.chevron_right),
-                  onPressed: () {},
+                  onPressed: _nextMonth,
                   iconSize: 20,
                 ),
               ],
@@ -54,7 +135,6 @@ class ChallengeCalendar extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 8),
-        // 요일 헤더
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: ['일', '월', '화', '수', '목', '금', '토'].map((day) => 
@@ -76,34 +156,33 @@ class ChallengeCalendar extends StatelessWidget {
             crossAxisCount: 7,
             childAspectRatio: 1,
           ),
-          itemCount: 42, // 6주 x 7일
+          itemCount: 42,
           itemBuilder: (context, index) {
-            // 달력에 표시할 날짜 계산
             final int displayDay = index - (firstWeekday - 1);
             if (displayDay < 1 || displayDay > daysInMonth) {
-              return Container(); // 현재 월에 속하지 않는 날짜는 빈 컨테이너 표시
+              return Container();
             }
 
-            final date = DateTime(currentDate.year, currentDate.month, displayDay);
-            final isToday = date.year == currentDate.year && 
-                           date.month == currentDate.month && 
-                           date.day == currentDate.day;
-            final hasWrongNotes = wrongNotes.containsKey(date);
+            final date = DateTime(_currentDate.year, _currentDate.month, displayDay);
+            final isToday = date.year == widget.initialDate.year && 
+                           date.month == widget.initialDate.month && 
+                           date.day == widget.initialDate.day;
+            final hasWrongNotes = _hasWrongNotesForDate(date);
             
             return GestureDetector(
-              onTap: hasWrongNotes ? () => onDateSelected(date) : null,
+              onTap: hasWrongNotes ? () => widget.onDateSelected(date) : null,
               child: Container(
                 margin: const EdgeInsets.all(2),
                 decoration: BoxDecoration(
                   color: hasWrongNotes
-                      ? Colors.blue.shade100
+                      ? Colors.blue.shade50
                       : isToday
                           ? Colors.blue
-                          : Colors.grey.shade100,
+                          : Colors.grey.shade50,
                   borderRadius: BorderRadius.circular(8),
                   border: isToday
                       ? Border.all(color: Colors.blue, width: 2)
-                      : null,
+                      : Border.all(color: Colors.grey.shade200),
                 ),
                 child: Stack(
                   children: [
@@ -138,56 +217,6 @@ class ChallengeCalendar extends StatelessWidget {
           },
         ),
       ],
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 4,
-      margin: const EdgeInsets.all(16),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.shade50,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Text(
-                    'Nice pace!',
-                    style: TextStyle(
-                      color: Colors.blue,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            _buildCalendarGrid(),
-          ],
-        ),
-      ),
     );
   }
 } 
