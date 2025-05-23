@@ -10,6 +10,7 @@ import 'screens/login_screen.dart';
 import 'screens/main_screen.dart';
 import 'utils/shared_intent_handler.dart';
 import "dart:io";
+import 'screens/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -106,6 +107,7 @@ class _AppContentState extends State<AppContent> {
   List<SharedMediaFile> _sharedFiles = [];
   String _sharedText = '';
   late SharedIntentHandler _sharedIntentHandler;
+  bool _showSplash = true;  // 스플래시 화면 표시 여부
 
   // MethodChannel 추가
   static const platform = MethodChannel('app/text_processing');
@@ -230,6 +232,12 @@ class _AppContentState extends State<AppContent> {
 
   @override
   Widget build(BuildContext context) {
+    if (_showSplash) {
+      return SplashScreen(
+        onComplete: () => setState(() => _showSplash = false),
+      );
+    }
+
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
