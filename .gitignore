@@ -58,19 +58,7 @@ firebase_options.dart
 keys.dart
 secrets.dart
 
-# Firebase 관련
-.firebase/
-.firebaserc
+assets/config/.env
+.env
 
-# Node.js 관련
-node_modules/
-package-lock.json
-
-# React/Build 결과물
-web/build/
-web/web_chat/build/
-web/web_chat/node_modules/
-web/web_chat/package-lock.json
-
-# 기타 빌드 산출물
-*.map
+/services/gemini_service.dart

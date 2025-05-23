@@ -75,34 +75,9 @@ class _MainScreenState extends State<MainScreen> {
     final height = size.height;
 
     return Scaffold(
-      appBar:
-          (_selectedIndex == 1 || _selectedIndex == 2)
-              ? AppBar(
-                title: Text(
-                  _webTitle.isNotEmpty
-                      ? _webTitle
-                      : (_selectedIndex == 1 ? 'Chat' : 'Wrong note'),
-                  style: TextStyle(fontSize: width * 0.05),
-                ),
-                toolbarHeight: height * 0.08,
-              )
-              : null,
+      appBar: null,
       body: _buildBody(width, height),
       bottomNavigationBar: _buildBottomNavBar(width, height),
-      floatingActionButton: SizedBox(
-        width: width * 0.16,
-        height: width * 0.16,
-        child: FloatingActionButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const CalendarScreen()),
-            );
-          },
-          child: Icon(Icons.calendar_today, size: width * 0.08),
-          tooltip: 'Open Calendar',
-        ),
-      ),
     );
   }
 
@@ -132,29 +107,30 @@ class _MainScreenState extends State<MainScreen> {
       currentIndex: _selectedIndex,
       onTap: _onItemTapped,
       type: BottomNavigationBarType.fixed,
+      backgroundColor: Colors.white,
+      elevation: 16,
       items: [
         BottomNavigationBarItem(
-          icon: Icon(Icons.home, size: width * 0.07),
+          icon: Icon(Icons.home_rounded, size: width * 0.07),
           label: '홈',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.school, size: width * 0.07),
+          icon: Icon(Icons.school_rounded, size: width * 0.07),
           label: '학습',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.person, size: width * 0.07),
+          icon: Icon(Icons.edit_note_rounded, size: width * 0.07),
           label: '오답노트',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.abc_rounded, size: width * 0.07),
+          icon: Icon(Icons.person_rounded, size: width * 0.07),
           label: '프로필',
         ),
       ],
-      selectedItemColor: Colors.blue,
-      unselectedItemColor: Colors.grey,
-      selectedFontSize: width * 0.035,
-      unselectedFontSize: width * 0.03,
-      iconSize: width * 0.07,
+      selectedItemColor: Colors.blue[600],
+      unselectedItemColor: Colors.grey[400],
+      selectedFontSize: width * 0.032,
+      unselectedFontSize: width * 0.032,
     );
   }
 }

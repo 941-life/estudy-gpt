@@ -380,15 +380,10 @@ class _PersonalScreenState extends State<PersonalScreen> {
 
   Widget _buildMainScreen() {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          _detectedLang == 'ko' ? '어학 학습 도우미' : 'Language Learning Helper',
-        ),
-      ),
-      body:
-          _isLoading && !_isProcessingFile
-              ? const Center(child: CircularProgressIndicator())
-              : _buildCurrentContent(),
+      appBar: null,
+      body: _isLoading && !_isProcessingFile
+          ? const Center(child: CircularProgressIndicator())
+          : _buildCurrentContent(),
       backgroundColor: Colors.grey[100],
     );
   }
