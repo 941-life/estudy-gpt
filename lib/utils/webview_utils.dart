@@ -15,17 +15,13 @@ void handleWebViewMessage(WebViewController controller, String message) {
 
 Future<void> sendUserDataToReact(
   WebViewController controller,
-  // String email,
-  // String displayName,
-  // String photoUrl,
   String accessToken,
   String uuid,
 ) async {
   controller.runJavaScript('''
     window.postMessage({
-      type: 'auth:success',
       accessToken: '$accessToken',
-      uuid: '$uuid'
+      uuid: '$uuid',
     }, '*');
   ''');
 }

@@ -65,13 +65,9 @@ class _WebViewBridgeState extends State<WebViewBridge> {
     if (widget.user == null) return;
 
     final String? accessToken = await getUserAccessToken(widget.user!);
-    print('Sending user data to React: ${widget.user!.uid}');
     if (accessToken != null) {
       sendUserDataToReact(
         _controller,
-        // widget.user!.email ?? '',
-        // widget.user!.displayName ?? '',
-        // widget.user!.photoURL ?? '',
         accessToken,
         widget.user!.uid,
       );
@@ -81,8 +77,8 @@ class _WebViewBridgeState extends State<WebViewBridge> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(child: WebViewWidget(controller: _controller)),
+      // appBar: AppBar(title: Text(_pageTitle)),
+      body: WebViewWidget(controller: _controller),
     );
   }
 }

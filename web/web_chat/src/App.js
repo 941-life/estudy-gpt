@@ -4,6 +4,7 @@ import ChatRoom from "./components/ChatRoom";
 import characters from "./data/characters";
 import styles from "./styles/App.module.css";
 import useFlutterMessage from "./hooks/useFlutterMessage";
+import { initializeAuth } from "./api/firebase";
 
 function App() {
   const [selected, setSelected] = useState(null);
@@ -12,6 +13,12 @@ function App() {
   const handleBack = () => setSelected(null);
 
   useFlutterMessage(setUserData);
+
+  React.useEffect(() => {
+    if (userData) {
+      initializeAuth(userData);
+    }
+  }, [userData]);
 
   return (
     <div className={styles.app}>

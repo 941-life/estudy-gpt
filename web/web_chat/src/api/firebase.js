@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getDatabase, ref, push, set, get } from "firebase/database";
-// import { getAuth, signInAnonymously } from "firebase/auth";
+import { getAuth, signInAnonymously } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
@@ -17,7 +17,7 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 
-export const initializeAuth = async () => {
+export const initializeAuth = async (userData) => {
   try {
     // const userCredential = await signInAnonymously(auth);
     // const uid = userCredential.user.uid;
