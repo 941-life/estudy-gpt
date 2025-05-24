@@ -9,7 +9,7 @@ class CalendarScreen extends StatelessWidget {
     return CalendarControllerProvider(
       controller: EventController(),
       child: Scaffold(
-        appBar: AppBar(title: const Text('캘린더')),
+        appBar: null,
         body: MonthView(),
       ),
     );

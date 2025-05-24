@@ -13,6 +13,7 @@
 
 
     <application
+        android:usesCleartextTraffic="true"
         android:label="estudy_gpt"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
@@ -101,27 +102,20 @@
 
         </activity>
 
-
-        <receiver android:name=".HomeCalendarWidgetProvider" android:exported="true">
+        <receiver android:name=".ChallengeCalendarWidgetProvider"
+            android:exported="true">
             <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
-
             <meta-data
                 android:name="android.appwidget.provider"
-                android:resource="@xml/calendar_widget_info"/>
+                android:resource="@xml/challenge_calendar_widget_info" />
         </receiver>
 
         <service
             android:name=".CalendarGridService"
             android:permission="android.permission.BIND_REMOTEVIEWS"
             android:exported = "false" />
-
-         <!-- <service
-            android:name=".CalendarWidgetService"
-            android:permission="android.permission.BIND_REMOTEVIEWS"
-            android:exported = "false" />    -->
-
 
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->

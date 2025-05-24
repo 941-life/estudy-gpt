@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:estudy_gpt/widgets/markdown_widget.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:estudy_gpt/widgets/common_app_bar.dart';
 
 import 'package:flutter/material.dart';
 import 'package:estudy_gpt/models/shared_data.dart';
@@ -375,49 +376,18 @@ class _PersonalScreenState extends State<PersonalScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return _buildMainScreen();
-  }
-
-  Widget _buildMainScreen() {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          _detectedLang == 'ko' ? '어학 학습 도우미' : 'Language Learning Helper',
-        ),
-      ),
+      appBar: const CommonAppBar(title: 'Home'),
+      backgroundColor: Colors.white,
       body:
-          _isLoading && !_isProcessingFile
+          _isLoading
               ? const Center(child: CircularProgressIndicator())
-              : _buildCurrentContent(),
-      backgroundColor: Colors.grey[100],
+              : _contentType == ContentType.text
+              ? _buildTextContent()
+              : _contentType == ContentType.document
+              ? _buildDocumentContent()
+              : _buildEmptyState(),
     );
-  }
-
-  Widget _buildCurrentContent() {
-    if (_isProcessingFile) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    switch (_contentType) {
-      case ContentType.text:
-        return _buildTextContent();
-      case ContentType.document:
-        return _buildDocumentContent();
-      case ContentType.unknown:
-      default:
-        if (widget.sharedFiles.isNotEmpty) {
-          return _buildUnsupportedFilesContent();
-        } else {
-          return Center(
-            child: Text(
-              _detectedLang == 'ko'
-                  ? '공유된 내용이 없습니다'
-                  : 'No shared content found.',
-              style: const TextStyle(fontSize: 18, color: Colors.grey),
-            ),
-          );
-        }
-    }
   }
 
   Widget _buildTextContent() {
@@ -427,97 +397,106 @@ class _PersonalScreenState extends State<PersonalScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Card(
-            elevation: 4,
+            elevation: 2,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(16),
             ),
-            color: Colors.white,
             child: Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    contentTypeLabels[_detectedLang]!['text']!,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.blue[700],
-                    ),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.text_fields,
+                        color: Colors.blue[700],
+                        size: 24,
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        contentTypeLabels[_detectedLang]!['text']!,
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue[700],
+                        ),
+                      ),
+                    ],
                   ),
-                  const Divider(),
+                  const Divider(height: 24),
                   Text(
                     _extractedText,
-                    style: const TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: const TextStyle(fontSize: 16, height: 1.5),
                   ),
                 ],
               ),
             ),
           ),
-          const SizedBox(height: 28),
+          const SizedBox(height: 24),
 
-          Text(
-            instructionText[_detectedLang] ?? instructionText['en']!,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 17,
-              color: Colors.blue[700],
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.blue.shade50,
+              borderRadius: BorderRadius.circular(16),
             ),
-          ),
-          const SizedBox(height: 18),
-
-          _buildLangLearningOptions(),
-
-          if (_selectedOption == LangOption.other)
-            Padding(
-              padding: const EdgeInsets.only(top: 10, bottom: 8),
-              child: TextField(
-                controller: _otherController,
-                decoration: InputDecoration(
-                  labelText:
-                      _detectedLang == 'ko'
-                          ? '기타 요청을 입력하세요'
-                          : 'Enter your custom request',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  instructionText[_detectedLang] ?? instructionText['en']!,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                    color: Colors.black87,
                   ),
                 ),
-                minLines: 1,
-                maxLines: 3,
-              ),
+                const SizedBox(height: 16),
+                _buildLangLearningOptions(),
+              ],
             ),
-
+          ),
           const SizedBox(height: 24),
-          ElevatedButton.icon(
-            onPressed: _isLoading ? null : _handleOptionSubmit,
-            icon: const Icon(Icons.send, size: 20),
-            label: Text(
-              _detectedLang == 'ko' ? '요청하기' : 'Submit',
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blueAccent,
-              foregroundColor: Colors.white,
-              minimumSize: const Size.fromHeight(48),
+
+          if (_result != null)
+            Card(
+              elevation: 2,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
-              elevation: 3,
-            ),
-          ),
-
-          const SizedBox(height: 32),
-
-          if (_isLoading) const Center(child: CircularProgressIndicator()),
-
-          if (_result != null)
-            MarkdownResultCard(
-              markdownText: _result!,
-              isVocabResult: _selectedOption == LangOption.vocab,
-              bottomWidget: null,
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.analytics,
+                          color: Colors.green[700],
+                          size: 24,
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          _detectedLang == 'ko' ? '분석 결과' : 'Analysis Result',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green[700],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Divider(height: 24),
+                    MarkdownResultCard(
+                      markdownText: _result!,
+                      isVocabResult: _selectedOption == LangOption.vocab,
+                      bottomWidget: null,
+                    ),
+                  ],
+                ),
+              ),
             ),
         ],
       ),
@@ -701,98 +680,135 @@ class _PersonalScreenState extends State<PersonalScreen> {
     };
 
     return Column(
-      children:
-          LangOption.values.map((option) {
-            final isSelected = _selectedOption == option;
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(12),
-                onTap:
-                    () => setState(() {
-                      _selectedOption = option;
-                      if (option != LangOption.other) _otherController.clear();
-                    }),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  curve: Curves.ease,
-                  decoration: BoxDecoration(
-                    color: isSelected ? Colors.blue[50] : Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: isSelected ? Colors.blueAccent : Colors.grey[300]!,
-                      width: isSelected ? 2 : 1,
-                    ),
-                    boxShadow: [
-                      if (isSelected)
-                        BoxShadow(
-                          color: Colors.blueAccent.withOpacity(0.08),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                    ],
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 14,
-                    horizontal: 16,
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        icons[option],
-                        color:
-                            isSelected ? Colors.blueAccent : Colors.grey[600],
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              labels[option]!['label']!,
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight:
-                                    isSelected
-                                        ? FontWeight.bold
-                                        : FontWeight.normal,
-                                color:
-                                    isSelected
-                                        ? Colors.blueAccent
-                                        : Colors.black87,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              labels[option]!['desc']!,
-                              style: TextStyle(
-                                fontSize: 13,
-                                color:
-                                    isSelected
-                                        ? Colors.blue[700]
-                                        : Colors.grey[600],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Radio<LangOption>(
-                        value: option,
-                        groupValue: _selectedOption,
-                        onChanged:
-                            (val) => setState(() {
-                              _selectedOption = val;
-                              if (option != LangOption.other)
-                                _otherController.clear();
-                            }),
-                        activeColor: Colors.blueAccent,
-                      ),
-                    ],
+      children: [
+        for (var option in LangOption.values)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: InkWell(
+              onTap: () => _handleOptionSelected(option),
+              child: Container(
+                decoration: BoxDecoration(
+                  color:
+                      _selectedOption == option
+                          ? Colors.blue.shade100
+                          : Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color:
+                        _selectedOption == option
+                            ? Colors.blue
+                            : Colors.grey.shade300,
                   ),
                 ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      icons[option],
+                      color:
+                          _selectedOption == option
+                              ? Colors.blue
+                              : Colors.grey.shade600,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        labels[option]!['label']!,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight:
+                              _selectedOption == option
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                          color:
+                              _selectedOption == option
+                                  ? Colors.blue
+                                  : Colors.black87,
+                        ),
+                      ),
+                    ),
+                    if (_selectedOption == option)
+                      Icon(Icons.check_circle, color: Colors.blue),
+                  ],
+                ),
               ),
-            );
-          }).toList(),
+            ),
+          ),
+        if (_selectedOption == LangOption.other)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: TextField(
+              controller: _otherController,
+              decoration: InputDecoration(
+                hintText:
+                    _detectedLang == 'ko'
+                        ? '원하는 분석 내용을 입력하세요'
+                        : 'Enter your analysis request',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                filled: true,
+                fillColor: Colors.white,
+              ),
+              maxLines: 3,
+            ),
+          ),
+        const SizedBox(height: 20),
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed:
+                _selectedOption == null ? null : () => _handleOptionSubmit(),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 0,
+            ),
+            child:
+                _isLoading
+                    ? const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                    : Text(
+                      _detectedLang == 'ko' ? '분석하기' : 'Analyze',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _handleOptionSelected(LangOption option) {
+    setState(() {
+      _selectedOption = option;
+      if (option != LangOption.other) {
+        _otherController.clear();
+      }
+    });
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Text(
+        _detectedLang == 'ko' ? '공유된 내용이 없습니다' : 'No shared content found.',
+        style: const TextStyle(fontSize: 18, color: Colors.grey),
+      ),
     );
   }
 }
