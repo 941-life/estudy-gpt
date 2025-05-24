@@ -68,10 +68,8 @@ class _WebViewBridgeState extends State<WebViewBridge> {
     if (accessToken != null) {
       sendUserDataToReact(
         _controller,
-        widget.user!.email ?? '',
-        widget.user!.displayName ?? '',
-        widget.user!.photoURL ?? '',
         accessToken,
+        widget.user!.uid,
       );
     }
   }
