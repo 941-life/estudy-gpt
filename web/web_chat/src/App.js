@@ -3,11 +3,15 @@ import CharacterList from "./components/CharacterList";
 import ChatRoom from "./components/ChatRoom";
 import characters from "./data/characters";
 import styles from "./styles/App.module.css";
+import useFlutterMessage from "./hooks/useFlutterMessage";
 
 function App() {
   const [selected, setSelected] = useState(null);
+  const [userData, setUserData] = useState(null);
   const handleSelect = (character) => setSelected(character);
   const handleBack = () => setSelected(null);
+
+  useFlutterMessage(setUserData);
 
   return (
     <div className={styles.app}>
@@ -23,4 +27,4 @@ function App() {
     </div>
   );
 }
-export default App; 
+export default App;

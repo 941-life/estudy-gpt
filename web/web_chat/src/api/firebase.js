@@ -1,6 +1,6 @@
-import { initializeApp } from 'firebase/app';
-import { getDatabase, ref, push, set, get } from 'firebase/database';
-import { getAuth, signInAnonymously } from 'firebase/auth';
+import { initializeApp } from "firebase/app";
+import { getDatabase, ref, push, set, get } from "firebase/database";
+// import { getAuth, signInAnonymously } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
@@ -19,24 +19,25 @@ const auth = getAuth(app);
 
 export const initializeAuth = async () => {
   try {
-    const userCredential = await signInAnonymously(auth);
-    const uid = userCredential.user.uid;
+    // const userCredential = await signInAnonymously(auth);
+    // const uid = userCredential.user.uid;
+    const uid = userData.uuid;
 
     const userRef = ref(db, `users/${uid}`);
     const snapshot = await get(userRef);
-    
+
     if (!snapshot.exists()) {
       await set(userRef, {
-        cefrLevel: 'A1',
+        cefrLevel: "A1",
         createdAt: Date.now(),
         totalSessions: 0,
-        recentScores: []
+        recentScores: [],
       });
     }
-    
+
     return uid;
   } catch (error) {
-    console.error('Error initializing anonymous auth:', error);
+    console.error("Error initializing anonymous auth:", error);
     throw error;
   }
 };
@@ -46,17 +47,17 @@ export const saveChat = async (message, characterId) => {
     const uid = auth.currentUser.uid;
     const chatRef = ref(db, `users/${uid}/chat/Conversation`);
     const newChatRef = push(chatRef);
-    
+
     await set(newChatRef, {
-      role: 'user',
+      role: "user",
       content: message,
       characterId,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
 
     return newChatRef.key;
   } catch (error) {
-    console.error('Error saving chat:', error.message);
+    console.error("Error saving chat:", error.message);
     throw error;
   }
 };
@@ -67,20 +68,20 @@ export const getChatsByUser = async () => {
     const uid = auth.currentUser.uid;
     const chatRef = ref(db, `users/${uid}/chat/Conversation`);
     const snapshot = await get(chatRef);
-    
+
     if (snapshot.exists()) {
       const chats = [];
       snapshot.forEach((childSnapshot) => {
         chats.push({
           id: childSnapshot.key,
-          ...childSnapshot.val()
+          ...childSnapshot.val(),
         });
       });
       return chats;
     }
     return [];
   } catch (error) {
-    console.error('Error retrieving chats:', error.message);
+    console.error("Error retrieving chats:", error.message);
     throw error;
   }
 };
@@ -92,10 +93,10 @@ export const updateChatAnalysis = async (chatId, analysis) => {
     const now = new Date();
     await set(analysisRef, {
       ...analysis,
-      analyzedAt: now.toISOString()
+      analyzedAt: now.toISOString(),
     });
   } catch (error) {
-    console.error('Error updating chat analysis:', error.message);
+    console.error("Error updating chat analysis:", error.message);
     throw error;
   }
 };

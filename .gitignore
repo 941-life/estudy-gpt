@@ -61,4 +61,13 @@ secrets.dart
 assets/config/.env
 .env
 
+/macos/*
+/macos
+/linux/*
+/linux
+/windows/*
+/windows
+/web/*
+/web
+
 /services/gemini_service.dart

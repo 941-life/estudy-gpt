@@ -4,7 +4,7 @@ class GeminiService {
   late final GenerativeModel _model;
 
   // API 키를 직접 하드코딩
-  static const String _apiKey = 'AIzaSyAXFEWAFnnkI9G_g9HzK6kkj-0WNUhv9sI';
+  static const String _apiKey = 'AIzaSyCIERBFRWafaeP9WVS4lvMPkOKDXe4-UD8';
 
   GeminiService() {
     if (_apiKey.isEmpty) {

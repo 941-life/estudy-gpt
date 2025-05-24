@@ -379,13 +379,14 @@ class _PersonalScreenState extends State<PersonalScreen> {
     return Scaffold(
       appBar: const CommonAppBar(title: 'Home'),
       backgroundColor: Colors.white,
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _contentType == ContentType.text
+      body:
+          _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : _contentType == ContentType.text
               ? _buildTextContent()
               : _contentType == ContentType.document
-                  ? _buildDocumentContent()
-                  : _buildEmptyState(),
+              ? _buildDocumentContent()
+              : _buildEmptyState(),
     );
   }
 
@@ -407,7 +408,11 @@ class _PersonalScreenState extends State<PersonalScreen> {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.text_fields, color: Colors.blue[700], size: 24),
+                      Icon(
+                        Icons.text_fields,
+                        color: Colors.blue[700],
+                        size: 24,
+                      ),
                       const SizedBox(width: 12),
                       Text(
                         contentTypeLabels[_detectedLang]!['text']!,
@@ -422,10 +427,7 @@ class _PersonalScreenState extends State<PersonalScreen> {
                   const Divider(height: 24),
                   Text(
                     _extractedText,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      height: 1.5,
-                    ),
+                    style: const TextStyle(fontSize: 16, height: 1.5),
                   ),
                 ],
               ),
@@ -470,7 +472,11 @@ class _PersonalScreenState extends State<PersonalScreen> {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.analytics, color: Colors.green[700], size: 24),
+                        Icon(
+                          Icons.analytics,
+                          color: Colors.green[700],
+                          size: 24,
+                        ),
                         const SizedBox(width: 12),
                         Text(
                           _detectedLang == 'ko' ? '분석 결과' : 'Analysis Result',
@@ -682,18 +688,30 @@ class _PersonalScreenState extends State<PersonalScreen> {
               onTap: () => _handleOptionSelected(option),
               child: Container(
                 decoration: BoxDecoration(
-                  color: _selectedOption == option ? Colors.blue.shade100 : Colors.white,
+                  color:
+                      _selectedOption == option
+                          ? Colors.blue.shade100
+                          : Colors.white,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: _selectedOption == option ? Colors.blue : Colors.grey.shade300,
+                    color:
+                        _selectedOption == option
+                            ? Colors.blue
+                            : Colors.grey.shade300,
                   ),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 child: Row(
                   children: [
                     Icon(
                       icons[option],
-                      color: _selectedOption == option ? Colors.blue : Colors.grey.shade600,
+                      color:
+                          _selectedOption == option
+                              ? Colors.blue
+                              : Colors.grey.shade600,
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -701,8 +719,14 @@ class _PersonalScreenState extends State<PersonalScreen> {
                         labels[option]!['label']!,
                         style: TextStyle(
                           fontSize: 16,
-                          fontWeight: _selectedOption == option ? FontWeight.bold : FontWeight.normal,
-                          color: _selectedOption == option ? Colors.blue : Colors.black87,
+                          fontWeight:
+                              _selectedOption == option
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                          color:
+                              _selectedOption == option
+                                  ? Colors.blue
+                                  : Colors.black87,
                         ),
                       ),
                     ),
@@ -719,7 +743,10 @@ class _PersonalScreenState extends State<PersonalScreen> {
             child: TextField(
               controller: _otherController,
               decoration: InputDecoration(
-                hintText: _detectedLang == 'ko' ? '원하는 분석 내용을 입력하세요' : 'Enter your analysis request',
+                hintText:
+                    _detectedLang == 'ko'
+                        ? '원하는 분석 내용을 입력하세요'
+                        : 'Enter your analysis request',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -733,7 +760,8 @@ class _PersonalScreenState extends State<PersonalScreen> {
         SizedBox(
           width: double.infinity,
           child: ElevatedButton(
-            onPressed: _selectedOption == null ? null : () => _handleOptionSubmit(),
+            onPressed:
+                _selectedOption == null ? null : () => _handleOptionSubmit(),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.blue,
               foregroundColor: Colors.white,
@@ -743,22 +771,23 @@ class _PersonalScreenState extends State<PersonalScreen> {
               ),
               elevation: 0,
             ),
-            child: _isLoading
-                ? const SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
-                      strokeWidth: 2,
+            child:
+                _isLoading
+                    ? const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                    : Text(
+                      _detectedLang == 'ko' ? '분석하기' : 'Analyze',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  )
-                : Text(
-                    _detectedLang == 'ko' ? '분석하기' : 'Analyze',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
           ),
         ),
       ],
@@ -777,9 +806,7 @@ class _PersonalScreenState extends State<PersonalScreen> {
   Widget _buildEmptyState() {
     return Center(
       child: Text(
-        _detectedLang == 'ko'
-            ? '공유된 내용이 없습니다'
-            : 'No shared content found.',
+        _detectedLang == 'ko' ? '공유된 내용이 없습니다' : 'No shared content found.',
         style: const TextStyle(fontSize: 18, color: Colors.grey),
       ),
     );
