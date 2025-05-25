@@ -13,10 +13,10 @@ function App() {
   const handleSelect = (character) => setSelected(character);
   const handleBack = () => setSelected(null);
 
-  // Flutter에서 메시지를 받는 경우
+  // Flutter 메시지 핸들러 설정
   useFlutterMessage(setUserData);
 
-  // 인증 초기화
+  // userData가 변경될 때만 인증 초기화
   useEffect(() => {
     const initAuth = async () => {
       try {
@@ -24,10 +24,11 @@ function App() {
         setIsInitialized(true);
       } catch (error) {
         console.error("Auth initialization error:", error);
-        setIsInitialized(true); // 에러가 발생해도 초기화는 완료된 것으로 처리
+        setIsInitialized(true);
       }
     };
 
+    // userData가 있든 없든 인증 초기화 실행
     initAuth();
   }, [userData]);
 
