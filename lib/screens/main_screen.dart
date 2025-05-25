@@ -43,8 +43,8 @@ class _MainScreenState extends State<MainScreen> {
       WebViewBridge(
         key: const ValueKey('webview_chat'),
         user: widget.user,
-        // initialUrl: 'https://estudy-5b2ba.web.app/',
-        initialUrl: 'http://192.168.1.2:3000/',
+        initialUrl: 'https://estudy-5b2ba.web.app/',
+        // initialUrl: 'http://192.168.1.2:3000',
         onTitleChanged: (_) => setState(() => _webTitle = 'Chat'),
       ),
     ];

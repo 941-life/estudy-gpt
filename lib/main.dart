@@ -15,14 +15,16 @@ import 'screens/splash_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  
+
   // 상태바 스타일 설정
-  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-    statusBarColor: Colors.transparent,
-    statusBarIconBrightness: Brightness.dark,
-    statusBarBrightness: Brightness.light,
-  ));
-  
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+      statusBarBrightness: Brightness.light,
+    ),
+  );
+
   runApp(const MyApp());
 }
 
@@ -37,7 +39,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         fontFamily: 'Pretendard',
         useMaterial3: true,
-        
+
         // AppBar 테마
         appBarTheme: const AppBarTheme(
           backgroundColor: Colors.white,
@@ -51,7 +53,7 @@ class MyApp extends StatelessWidget {
           ),
           iconTheme: IconThemeData(color: Colors.black87),
         ),
-        
+
         // FloatingActionButton 테마
         floatingActionButtonTheme: FloatingActionButtonThemeData(
           backgroundColor: Colors.blue[600],
@@ -60,7 +62,7 @@ class MyApp extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
           ),
         ),
-        
+
         // BottomNavigationBar 테마
         bottomNavigationBarTheme: BottomNavigationBarThemeData(
           backgroundColor: Colors.white,
@@ -77,7 +79,7 @@ class MyApp extends StatelessWidget {
           ),
           elevation: 8,
         ),
-        
+
         // Card 테마
         cardTheme: CardTheme(
           elevation: 2,
@@ -107,7 +109,7 @@ class _AppContentState extends State<AppContent> {
   List<SharedMediaFile> _sharedFiles = [];
   String _sharedText = '';
   late SharedIntentHandler _sharedIntentHandler;
-  bool _showSplash = true;  // 스플래시 화면 표시 여부
+  bool _showSplash = true; // 스플래시 화면 표시 여부
 
   // MethodChannel 추가
   static const platform = MethodChannel('app/text_processing');
