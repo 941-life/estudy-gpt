@@ -103,7 +103,7 @@ const LEVEL_ADJUSTMENTS = {
   }
 };
 
-function ChatRoom({ character, onBack, userData }) {
+function ChatRoom({ character, onBack }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -112,60 +112,39 @@ function ChatRoom({ character, onBack, userData }) {
   const [isCompleting, setIsCompleting] = useState(false);
   const [showAnalysis, setShowAnalysis] = useState(false);
   const [analysis, setAnalysis] = useState(null);
-  const [isAuthReady, setIsAuthReady] = useState(false);
-  const [isInitializing, setIsInitializing] = useState(true);
   const [userLevel, setUserLevel] = useState("A1");
-  const [showAuthError, setShowAuthError] = useState(false);
-  const [authError, setAuthError] = useState('');
+  const [isAuthReady, setIsAuthReady] = useState(false);
   const chatEndRef = useRef(null);
   const inputRef = useRef(null);
 
   useEffect(() => {
-    const initAuth = async () => {
-      setIsInitializing(true);
-      try {
-        if (userData && userData.email) {
-          await initializeAuth(userData);
-          setIsAuthReady(true);
-          
-          if (window.FlutterBridge) {
-            window.FlutterBridge.postMessage(JSON.stringify({
-              type: 'auth:status',
-              status: 'authenticated',
-              uid: userData.uid
-            }));
-          }
-        } else {
-          throw new Error('User data is required for authentication');
-        }
-
-        const uid = userData.uid;
-        const userRef = ref(db, `users/${uid}`);
-        const snapshot = await get(userRef);
-        if (snapshot.exists()) {
-          const userData = snapshot.val();
-          if (userData.cefrLevel) {
-            setUserLevel(userData.cefrLevel);
-          }
-        }
-      } catch (error) {
-        console.error('인증 초기화 중 오류:', error);
-        setAuthError(error.message);
-        setShowAuthError(true);
-        if (window.FlutterBridge) {
-          window.FlutterBridge.postMessage(JSON.stringify({
-            type: 'auth:status',
-            status: 'error',
-            error: error.message,
-            uid: userData?.uid
-          }));
-        }
-      } finally {
-        setIsInitializing(false);
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setIsAuthReady(!!user);
+      if (user) {
+        initUserData();
       }
-    };
-    initAuth();
-  }, [userData]);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const initUserData = async () => {
+    try {
+      if (!auth.currentUser) return;
+      
+      const uid = auth.currentUser.uid;
+      const userRef = ref(db, `users/${uid}`);
+      const snapshot = await get(userRef);
+      if (snapshot.exists()) {
+        const userData = snapshot.val();
+        if (userData.cefrLevel) {
+          setUserLevel(userData.cefrLevel);
+        }
+      }
+    } catch (error) {
+      console.error('사용자 데이터 초기화 중 오류:', error);
+    }
+  };
 
   const removeMarkdown = (text) => {
     return text
@@ -415,7 +394,7 @@ Goal: Maintain character while helping practice English.`;
   };
 
   const handleSendMessage = async (message) => {
-    if (!message.trim() || !isAuthReady) return;
+    if (!message.trim() || !isAuthReady || !auth.currentUser) return;
 
     const newMessage = {
       role: 'user',
@@ -494,34 +473,11 @@ Goal: Maintain character while helping practice English.`;
     }
   };
 
-  const AuthErrorPopup = () => (
-    <div className={styles.errorPopup}>
-      <div className={styles.errorContent}>
-        <h3>인증 오류</h3>
-        <p>{authError}</p>
-        <button onClick={() => {
-          setShowAuthError(false);
-          onBack();
-        }}>
-          확인
-        </button>
-      </div>
-    </div>
-  );
-
-  if (!isAuthReady || showAuthError) {
+  if (!isAuthReady) {
     return (
-      <div className={styles.container}>
-        {showAuthError && <AuthErrorPopup />}
+      <div className={styles.loadingContainer}>
+        <div className={styles.loadingSpinner} />
       </div>
-    );
-  }
-
-  if (isInitializing) {
-    return (
-        <div className={styles.loadingContainer}>
-          <div className={styles.loadingSpinner} />
-        </div>
     );
   }
 

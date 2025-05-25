@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getDatabase, ref, push, set, get } from "firebase/database";
-// import { getAuth, signInAnonymously } from "firebase/auth";
+import { getAuth, signInAnonymously } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
@@ -17,11 +17,16 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 
-export const initializeAuth = async () => {
+export const initializeAuth = async (userData) => {
   try {
-    // const userCredential = await signInAnonymously(auth);
-    // const uid = userCredential.user.uid;
-    const uid = userData.uuid;
+    let uid;
+    
+    if (userData && userData.uuid) {
+      uid = userData.uuid;
+    } else {
+      const userCredential = await signInAnonymously(auth);
+      uid = userCredential.user.uid;
+    }
 
     const userRef = ref(db, `users/${uid}`);
     const snapshot = await get(userRef);
@@ -37,13 +42,17 @@ export const initializeAuth = async () => {
 
     return uid;
   } catch (error) {
-    console.error("Error initializing anonymous auth:", error);
+    console.error("Error initializing auth:", error);
     throw error;
   }
 };
 
 export const saveChat = async (message, characterId) => {
   try {
+    if (!auth.currentUser) {
+      throw new Error("User not authenticated");
+    }
+
     const uid = auth.currentUser.uid;
     const chatRef = ref(db, `users/${uid}/chat/Conversation`);
     const newChatRef = push(chatRef);
@@ -65,6 +74,10 @@ export const saveChat = async (message, characterId) => {
 //추후 오답노트 기록 불러올 일 생기면 사용할 함수
 export const getChatsByUser = async () => {
   try {
+    if (!auth.currentUser) {
+      throw new Error("User not authenticated");
+    }
+
     const uid = auth.currentUser.uid;
     const chatRef = ref(db, `users/${uid}/chat/Conversation`);
     const snapshot = await get(chatRef);
@@ -88,6 +101,10 @@ export const getChatsByUser = async () => {
 
 export const updateChatAnalysis = async (chatId, analysis) => {
   try {
+    if (!auth.currentUser) {
+      throw new Error("User not authenticated");
+    }
+
     const uid = auth.currentUser.uid;
     const analysisRef = ref(db, `users/${uid}/wrongNote/${chatId}`);
     const now = new Date();
