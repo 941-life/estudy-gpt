@@ -19,11 +19,15 @@ const auth = getAuth(app);
 
 export const initializeAuth = async (userData) => {
   try {
-    if (!userData || !userData.uuid) {
-      throw new Error("User ID is required");
+    let uid;
+    
+    if (userData && userData.uuid) {
+      uid = userData.uuid;
+    } else {
+      const userCredential = await signInAnonymously(auth);
+      uid = userCredential.user.uid;
     }
 
-    const uid = userData.uuid;
     const userRef = ref(db, `users/${uid}`);
     const snapshot = await get(userRef);
 
@@ -45,6 +49,10 @@ export const initializeAuth = async (userData) => {
 
 export const saveChat = async (message, characterId) => {
   try {
+    if (!auth.currentUser) {
+      throw new Error("User not authenticated");
+    }
+
     const uid = auth.currentUser.uid;
     const chatRef = ref(db, `users/${uid}/chat/Conversation`);
     const newChatRef = push(chatRef);
@@ -66,6 +74,10 @@ export const saveChat = async (message, characterId) => {
 //추후 오답노트 기록 불러올 일 생기면 사용할 함수
 export const getChatsByUser = async () => {
   try {
+    if (!auth.currentUser) {
+      throw new Error("User not authenticated");
+    }
+
     const uid = auth.currentUser.uid;
     const chatRef = ref(db, `users/${uid}/chat/Conversation`);
     const snapshot = await get(chatRef);
@@ -89,6 +101,10 @@ export const getChatsByUser = async () => {
 
 export const updateChatAnalysis = async (chatId, analysis) => {
   try {
+    if (!auth.currentUser) {
+      throw new Error("User not authenticated");
+    }
+
     const uid = auth.currentUser.uid;
     const analysisRef = ref(db, `users/${uid}/wrongNote/${chatId}`);
     const now = new Date();

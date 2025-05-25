@@ -113,27 +113,38 @@ function ChatRoom({ character, onBack }) {
   const [showAnalysis, setShowAnalysis] = useState(false);
   const [analysis, setAnalysis] = useState(null);
   const [userLevel, setUserLevel] = useState("A1");
+  const [isAuthReady, setIsAuthReady] = useState(false);
   const chatEndRef = useRef(null);
   const inputRef = useRef(null);
 
   useEffect(() => {
-    const initUserData = async () => {
-      try {
-        const uid = auth.currentUser.uid;
-        const userRef = ref(db, `users/${uid}`);
-        const snapshot = await get(userRef);
-        if (snapshot.exists()) {
-          const userData = snapshot.val();
-          if (userData.cefrLevel) {
-            setUserLevel(userData.cefrLevel);
-          }
-        }
-      } catch (error) {
-        console.error('사용자 데이터 초기화 중 오류:', error);
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setIsAuthReady(!!user);
+      if (user) {
+        initUserData();
       }
-    };
-    initUserData();
+    });
+
+    return () => unsubscribe();
   }, []);
+
+  const initUserData = async () => {
+    try {
+      if (!auth.currentUser) return;
+      
+      const uid = auth.currentUser.uid;
+      const userRef = ref(db, `users/${uid}`);
+      const snapshot = await get(userRef);
+      if (snapshot.exists()) {
+        const userData = snapshot.val();
+        if (userData.cefrLevel) {
+          setUserLevel(userData.cefrLevel);
+        }
+      }
+    } catch (error) {
+      console.error('사용자 데이터 초기화 중 오류:', error);
+    }
+  };
 
   const removeMarkdown = (text) => {
     return text
@@ -383,7 +394,7 @@ Goal: Maintain character while helping practice English.`;
   };
 
   const handleSendMessage = async (message) => {
-    if (!message.trim()) return;
+    if (!message.trim() || !isAuthReady || !auth.currentUser) return;
 
     const newMessage = {
       role: 'user',
@@ -461,6 +472,14 @@ Goal: Maintain character while helping practice English.`;
       handleSendMessage(input);
     }
   };
+
+  if (!isAuthReady) {
+    return (
+      <div className={styles.loadingContainer}>
+        <div className={styles.loadingSpinner} />
+      </div>
+    );
+  }
 
   if (!selectedScenario) {
     return <ScenarioSelector onSelect={setSelectedScenario} character={character} />;
