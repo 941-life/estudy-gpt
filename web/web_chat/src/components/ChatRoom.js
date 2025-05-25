@@ -112,19 +112,13 @@ function ChatRoom({ character, onBack }) {
   const [isCompleting, setIsCompleting] = useState(false);
   const [showAnalysis, setShowAnalysis] = useState(false);
   const [analysis, setAnalysis] = useState(null);
-  const [isAuthReady, setIsAuthReady] = useState(false);
-  const [isInitializing, setIsInitializing] = useState(true);
   const [userLevel, setUserLevel] = useState("A1");
   const chatEndRef = useRef(null);
   const inputRef = useRef(null);
 
   useEffect(() => {
-    const initAuth = async () => {
-      setIsInitializing(true);
+    const initUserData = async () => {
       try {
-        await initializeAuth();
-        setIsAuthReady(true);
-
         const uid = auth.currentUser.uid;
         const userRef = ref(db, `users/${uid}`);
         const snapshot = await get(userRef);
@@ -135,12 +129,10 @@ function ChatRoom({ character, onBack }) {
           }
         }
       } catch (error) {
-        console.error('인증 초기화 중 오류:', error);
-      } finally {
-        setIsInitializing(false);
+        console.error('사용자 데이터 초기화 중 오류:', error);
       }
     };
-    initAuth();
+    initUserData();
   }, []);
 
   const removeMarkdown = (text) => {
@@ -391,7 +383,7 @@ Goal: Maintain character while helping practice English.`;
   };
 
   const handleSendMessage = async (message) => {
-    if (!message.trim() || !isAuthReady) return;
+    if (!message.trim()) return;
 
     const newMessage = {
       role: 'user',
@@ -469,14 +461,6 @@ Goal: Maintain character while helping practice English.`;
       handleSendMessage(input);
     }
   };
-
-  if (isInitializing) {
-    return (
-        <div className={styles.loadingContainer}>
-          <div className={styles.loadingSpinner} />
-        </div>
-    );
-  }
 
   if (!selectedScenario) {
     return <ScenarioSelector onSelect={setSelectedScenario} character={character} />;

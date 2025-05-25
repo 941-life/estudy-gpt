@@ -19,10 +19,11 @@ const auth = getAuth(app);
 
 export const initializeAuth = async (userData) => {
   try {
-    // const userCredential = await signInAnonymously(auth);
-    // const uid = userCredential.user.uid;
-    const uid = userData.uuid;
+    if (!userData || !userData.uuid) {
+      throw new Error("User ID is required");
+    }
 
+    const uid = userData.uuid;
     const userRef = ref(db, `users/${uid}`);
     const snapshot = await get(userRef);
 
@@ -37,7 +38,7 @@ export const initializeAuth = async (userData) => {
 
     return uid;
   } catch (error) {
-    console.error("Error initializing anonymous auth:", error);
+    console.error("Error initializing auth:", error);
     throw error;
   }
 };
