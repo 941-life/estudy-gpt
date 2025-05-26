@@ -17,16 +17,46 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 
+let globalUid = null;
+let isInitializing = false; // 초기화 진행 중 플래그 추가
+
 export const initializeAuth = async (userData) => {
+  // 이미 초기화 중이거나 완료된 경우 중복 실행 방지
+  if (isInitializing || globalUid) {
+    console.log("Auth already initialized or in progress");
+    return globalUid;
+  }
+
+  isInitializing = true; // 초기화 시작 표시
+
   try {
     let uid;
-    
+
     if (userData && userData.uuid) {
+      // Flutter에서 uuid를 받은 경우
       uid = userData.uuid;
-    } else {
+      console.log("=== Flutter에서 받은 uuid ===");
+      console.log("userData:", userData);
+      console.log("userData.uuid:", userData.uuid);
+      console.log("설정된 uid:", uid);
+    } else if (!auth.currentUser) {
+      // 웹에서 직접 접속한 경우에만 익명 인증 실행
       const userCredential = await signInAnonymously(auth);
       uid = userCredential.user.uid;
+      console.log("=== Firebase 익명 인증으로 생성된 uid ===");
+      console.log("userCredential:", userCredential);
+      console.log("userCredential.user.uid:", userCredential.user.uid);
+      console.log("설정된 uid:", uid);
+    } else {
+      // 이미 인증된 경우
+      uid = auth.currentUser.uid;
+      console.log("=== 이미 인증된 사용자 ===");
+      console.log("auth.currentUser.uid:", uid);
     }
+
+    globalUid = uid;
+    console.log("=== 최종 설정된 globalUid ===");
+    console.log("globalUid:", globalUid);
 
     const userRef = ref(db, `users/${uid}`);
     const snapshot = await get(userRef);
@@ -44,17 +74,22 @@ export const initializeAuth = async (userData) => {
   } catch (error) {
     console.error("Error initializing auth:", error);
     throw error;
+  } finally {
+    isInitializing = false; // 초기화 완료 표시
   }
 };
 
+// 나머지 함수들은 동일...
 export const saveChat = async (message, characterId) => {
   try {
-    if (!auth.currentUser) {
-      throw new Error("User not authenticated");
+    if (!globalUid) {
+      throw new Error("User not initialized");
     }
 
-    const uid = auth.currentUser.uid;
-    const chatRef = ref(db, `users/${uid}/chat/Conversation`);
+    console.log("=== saveChat 함수에서 사용되는 uid ===");
+    console.log("globalUid:", globalUid);
+
+    const chatRef = ref(db, `users/${globalUid}/chat/Conversation`);
     const newChatRef = push(chatRef);
 
     await set(newChatRef, {
@@ -71,15 +106,13 @@ export const saveChat = async (message, characterId) => {
   }
 };
 
-//추후 오답노트 기록 불러올 일 생기면 사용할 함수
 export const getChatsByUser = async () => {
   try {
-    if (!auth.currentUser) {
-      throw new Error("User not authenticated");
+    if (!globalUid) {
+      throw new Error("User not initialized");
     }
 
-    const uid = auth.currentUser.uid;
-    const chatRef = ref(db, `users/${uid}/chat/Conversation`);
+    const chatRef = ref(db, `users/${globalUid}/chat/Conversation`);
     const snapshot = await get(chatRef);
 
     if (snapshot.exists()) {
@@ -101,12 +134,11 @@ export const getChatsByUser = async () => {
 
 export const updateChatAnalysis = async (chatId, analysis) => {
   try {
-    if (!auth.currentUser) {
-      throw new Error("User not authenticated");
+    if (!globalUid) {
+      throw new Error("User not initialized");
     }
 
-    const uid = auth.currentUser.uid;
-    const analysisRef = ref(db, `users/${uid}/wrongNote/${chatId}`);
+    const analysisRef = ref(db, `users/${globalUid}/wrongNote/${chatId}`);
     const now = new Date();
     await set(analysisRef, {
       ...analysis,

@@ -10,6 +10,8 @@ function App() {
   const [selected, setSelected] = useState(null);
   const [userData, setUserData] = useState(null);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [hasInitialized, setHasInitialized] = useState(false);
+
   const handleSelect = (character) => setSelected(character);
   const handleBack = () => setSelected(null);
 
@@ -18,23 +20,55 @@ function App() {
 
   // 인증 초기화
   useEffect(() => {
-    const initAuth = async () => {
+    const initAuth = async (userData) => {
+      console.log("Initializing auth with userData:", userData);
       try {
         await initializeAuth(userData);
         setIsInitialized(true);
+        setHasInitialized(true);
       } catch (error) {
         console.error("Auth initialization error:", error);
-        setIsInitialized(true); // 에러가 발생해도 초기화는 완료된 것으로 처리
+        setIsInitialized(true);
+        setHasInitialized(true);
       }
     };
 
-    initAuth();
+    if (!hasInitialized) {
+      // Flutter에서 userData를 받은 경우 즉시 초기화
+      if (userData && userData.uuid) {
+        console.log("Flutter userData received, initializing immediately");
+        initAuth(userData);
+      } else {
+        // userData가 없는 경우 3초 후 웹 전용으로 초기화
+        console.log("Waiting for Flutter message or timeout...");
+        const timer = setTimeout(() => {
+          if (!hasInitialized) {
+            console.log("No Flutter message received, initializing for web");
+            initAuth(null);
+          }
+        }, 3000);
+
+        return () => {
+          console.log("Clearing timeout");
+          clearTimeout(timer);
+        };
+      }
+    }
+  }, [userData, hasInitialized]);
+
+  // 디버깅을 위한 userData 변경 감지
+  useEffect(() => {
+    console.log("userData changed:", userData);
   }, [userData]);
 
   if (!isInitialized) {
     return (
       <div className={styles.loadingContainer}>
         <div className={styles.loadingSpinner} />
+        <p>
+          Initializing...{" "}
+          {userData ? `Received UUID: ${userData.uuid}` : "Waiting for data..."}
+        </p>
       </div>
     );
   }

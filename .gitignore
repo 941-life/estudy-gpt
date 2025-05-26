@@ -67,7 +67,6 @@ assets/config/.env
 /linux
 /windows/*
 /windows
-/web/*
-/web
+
 
 /services/gemini_service.dart

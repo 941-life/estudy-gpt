@@ -1,6 +1,11 @@
 import React, { useRef, useEffect, useState } from "react";
 import styles from "../styles/ChatRoom.module.css";
-import { fetchGeminiReply, initializeChatSession, clearChatSession, getConversationHistory } from "../api/gemini";
+import {
+  fetchGeminiReply,
+  initializeChatSession,
+  clearChatSession,
+  getConversationHistory,
+} from "../api/gemini";
 import { saveChat, updateChatAnalysis, initializeAuth } from "../api/firebase";
 import ScenarioSelector from "./ScenarioSelector";
 import AnalysisModal from "./AnalysisModal";
@@ -8,99 +13,99 @@ import { auth, db } from "../firebase/firebaseConfig";
 import { get, ref, update } from "firebase/database";
 
 const CEFR_CRITERIA = {
-  'A1': {
+  A1: {
     score: [0, 30],
     criteria: [
-      'Can use basic vocabulary and simple phrases',
-      'Can understand and use familiar everyday expressions',
-      'Can introduce themselves and others',
-      'Can ask and answer simple questions about personal details'
-    ]
+      "Can use basic vocabulary and simple phrases",
+      "Can understand and use familiar everyday expressions",
+      "Can introduce themselves and others",
+      "Can ask and answer simple questions about personal details",
+    ],
   },
-  'A2': {
+  A2: {
     score: [31, 50],
     criteria: [
-      'Can communicate in simple and routine tasks',
-      'Can describe in simple terms aspects of their background',
-      'Can handle short social exchanges',
-      'Can understand sentences and frequently used expressions'
-    ]
+      "Can communicate in simple and routine tasks",
+      "Can describe in simple terms aspects of their background",
+      "Can handle short social exchanges",
+      "Can understand sentences and frequently used expressions",
+    ],
   },
-  'B1': {
+  B1: {
     score: [51, 70],
     criteria: [
-      'Can deal with most situations likely to arise while traveling',
-      'Can produce simple connected text on familiar topics',
-      'Can describe experiences, events, dreams, and ambitions',
-      'Can give reasons and explanations for opinions and plans'
-    ]
+      "Can deal with most situations likely to arise while traveling",
+      "Can produce simple connected text on familiar topics",
+      "Can describe experiences, events, dreams, and ambitions",
+      "Can give reasons and explanations for opinions and plans",
+    ],
   },
-  'B2': {
+  B2: {
     score: [71, 85],
     criteria: [
-      'Can interact with a degree of fluency and spontaneity',
-      'Can produce clear, detailed text on a wide range of subjects',
-      'Can explain a viewpoint on a topical issue',
-      'Can understand the main ideas of complex text'
-    ]
+      "Can interact with a degree of fluency and spontaneity",
+      "Can produce clear, detailed text on a wide range of subjects",
+      "Can explain a viewpoint on a topical issue",
+      "Can understand the main ideas of complex text",
+    ],
   },
-  'C1': {
+  C1: {
     score: [86, 95],
     criteria: [
-      'Can express ideas fluently and spontaneously',
-      'Can use language flexibly and effectively for social and professional purposes',
-      'Can produce clear, well-structured, detailed text on complex subjects',
-      'Can understand implicit meaning'
-    ]
+      "Can express ideas fluently and spontaneously",
+      "Can use language flexibly and effectively for social and professional purposes",
+      "Can produce clear, well-structured, detailed text on complex subjects",
+      "Can understand implicit meaning",
+    ],
   },
-  'C2': {
+  C2: {
     score: [96, 100],
     criteria: [
-      'Can understand with ease virtually everything heard or read',
-      'Can summarize information from different sources',
-      'Can express themselves spontaneously, very fluently and precisely',
-      'Can differentiate finer shades of meaning'
-    ]
-  }
+      "Can understand with ease virtually everything heard or read",
+      "Can summarize information from different sources",
+      "Can express themselves spontaneously, very fluently and precisely",
+      "Can differentiate finer shades of meaning",
+    ],
+  },
 };
 
 const LEVEL_ADJUSTMENTS = {
-  'A1': {
-    vocab: 'basic (up to 500 words)',
-    grammar: 'simple present tense and basic present continuous',
-    sentenceLength: '5-7 words',
-    focus: 'concrete, everyday topics'
+  A1: {
+    vocab: "basic (up to 500 words)",
+    grammar: "simple present tense and basic present continuous",
+    sentenceLength: "5-7 words",
+    focus: "concrete, everyday topics",
   },
-  'A2': {
-    vocab: 'basic (up to 1000 words)',
-    grammar: 'simple past and future tenses',
-    sentenceLength: '7-10 words',
-    focus: 'familiar topics and daily routines'
+  A2: {
+    vocab: "basic (up to 1000 words)",
+    grammar: "simple past and future tenses",
+    sentenceLength: "7-10 words",
+    focus: "familiar topics and daily routines",
   },
-  'B1': {
-    vocab: 'intermediate (up to 2000 words)',
-    grammar: 'various tenses and modal verbs',
-    sentenceLength: '10-15 words',
-    focus: 'abstract topics and opinions'
+  B1: {
+    vocab: "intermediate (up to 2000 words)",
+    grammar: "various tenses and modal verbs",
+    sentenceLength: "10-15 words",
+    focus: "abstract topics and opinions",
   },
-  'B2': {
-    vocab: 'advanced (up to 4000 words)',
-    grammar: 'complex grammar structures',
-    sentenceLength: '15-20 words',
-    focus: 'complex topics and hypothetical situations'
+  B2: {
+    vocab: "advanced (up to 4000 words)",
+    grammar: "complex grammar structures",
+    sentenceLength: "15-20 words",
+    focus: "complex topics and hypothetical situations",
   },
-  'C1': {
-    vocab: 'sophisticated (up to 8000 words)',
-    grammar: 'advanced grammar structures',
-    sentenceLength: '20+ words',
-    focus: 'abstract concepts and specialized topics'
+  C1: {
+    vocab: "sophisticated (up to 8000 words)",
+    grammar: "advanced grammar structures",
+    sentenceLength: "20+ words",
+    focus: "abstract concepts and specialized topics",
   },
-  'C2': {
-    vocab: 'native-like expressions',
-    grammar: 'complex grammar naturally',
-    sentenceLength: 'natural length',
-    focus: 'any topic with depth and precision'
-  }
+  C2: {
+    vocab: "native-like expressions",
+    grammar: "complex grammar naturally",
+    sentenceLength: "natural length",
+    focus: "any topic with depth and precision",
+  },
 };
 
 function ChatRoom({ character, onBack }) {
@@ -131,7 +136,7 @@ function ChatRoom({ character, onBack }) {
   const initUserData = async () => {
     try {
       if (!auth.currentUser) return;
-      
+
       const uid = auth.currentUser.uid;
       const userRef = ref(db, `users/${uid}`);
       const snapshot = await get(userRef);
@@ -142,20 +147,20 @@ function ChatRoom({ character, onBack }) {
         }
       }
     } catch (error) {
-      console.error('사용자 데이터 초기화 중 오류:', error);
+      console.error("사용자 데이터 초기화 중 오류:", error);
     }
   };
 
   const removeMarkdown = (text) => {
     return text
-        .replace(/\*\*(.*?)\*\*/g, '$1')
-        .replace(/\*(.*?)\*/g, '$1')
-        .replace(/_(.*?)_/g, '$1')
-        .replace(/`(.*?)`/g, '$1')
-        .replace(/\[(.*?)\]\((.*?)\)/g, '$1')
-        .replace(/\n/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim();
+      .replace(/\*\*(.*?)\*\*/g, "$1")
+      .replace(/\*(.*?)\*/g, "$1")
+      .replace(/_(.*?)_/g, "$1")
+      .replace(/`(.*?)`/g, "$1")
+      .replace(/\[(.*?)\]\((.*?)\)/g, "$1")
+      .replace(/\n/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
   };
 
   useEffect(() => {
@@ -206,14 +211,16 @@ Goal: Maintain character while helping practice English.`;
   useEffect(() => {
     if (selectedScenario) {
       const adjustedPrompt = getLevelAdjustedPrompt(selectedScenario.prompt);
-      initializeChatSession(character.id, adjustedPrompt)
-          .catch(err => {
-            console.error("Failed to initialize chat session:", err);
-            setMessages(msgs => [...msgs, {
-              from: "other",
-              text: "채팅 세션을 시작하지 못했어요. 다시 시도해주세요."
-            }]);
-          });
+      initializeChatSession(character.id, adjustedPrompt).catch((err) => {
+        console.error("Failed to initialize chat session:", err);
+        setMessages((msgs) => [
+          ...msgs,
+          {
+            from: "other",
+            text: "채팅 세션을 시작하지 못했어요. 다시 시도해주세요.",
+          },
+        ]);
+      });
     }
   }, [selectedScenario, character.id, userLevel]);
 
@@ -227,13 +234,15 @@ Goal: Maintain character while helping practice English.`;
 
   const analyzeChat = async (messages) => {
     try {
-      const userMessages = messages.filter(msg => msg.role === 'user').map(msg => msg.content);
-      
+      const userMessages = messages
+        .filter((msg) => msg.role === "user")
+        .map((msg) => msg.content);
+
       const uid = auth.currentUser.uid;
       const userRef = ref(db, `users/${uid}`);
       const snapshot = await get(userRef);
-      const currentLevel = snapshot.exists() ? snapshot.val().cefrLevel : 'A1';
-      
+      const currentLevel = snapshot.exists() ? snapshot.val().cefrLevel : "A1";
+
       const prompt = `You are a friendly English conversation partner analyzing a casual chat. Your role is to evaluate the user's English and provide constructive feedback.
 
       IMPORTANT GUIDELINES FOR ERROR CORRECTION:
@@ -266,20 +275,26 @@ Goal: Maintain character while helping practice English.`;
       try {
         const jsonMatch = responseText.match(/\{[\s\S]*\}/);
         if (!jsonMatch) {
-          throw new Error('No JSON found in response');
+          throw new Error("No JSON found in response");
         }
 
         const parsedAnalysis = JSON.parse(jsonMatch[0]);
 
-        if (!parsedAnalysis.corrections || !Array.isArray(parsedAnalysis.corrections)) {
-          throw new Error('Invalid corrections format');
+        if (
+          !parsedAnalysis.corrections ||
+          !Array.isArray(parsedAnalysis.corrections)
+        ) {
+          throw new Error("Invalid corrections format");
         }
-        if (!parsedAnalysis.summary || typeof parsedAnalysis.summary !== 'string') {
-          throw new Error('Invalid summary format');
+        if (
+          !parsedAnalysis.summary ||
+          typeof parsedAnalysis.summary !== "string"
+        ) {
+          throw new Error("Invalid summary format");
         }
 
         const correctionCount = parsedAnalysis.corrections.length;
-        const score = Math.max(0, 100 - (correctionCount * 10));
+        const score = Math.max(0, 100 - correctionCount * 10);
 
         const newLevel = await checkAndUpdateCEFRLevel(score);
 
@@ -287,20 +302,20 @@ Goal: Maintain character while helping practice English.`;
           ...parsedAnalysis,
           score,
           previousCefrLevel: currentLevel,
-          newCefrLevel: newLevel
+          newCefrLevel: newLevel,
         };
       } catch (e) {
-        console.error('Failed to parse analysis response:', e);
+        console.error("Failed to parse analysis response:", e);
         return {
           corrections: [],
           summary: "분석 결과를 파싱하는데 실패했습니다. 다시 시도해주세요.",
           score: 0,
           previousCefrLevel: currentLevel,
-          newCefrLevel: currentLevel
+          newCefrLevel: currentLevel,
         };
       }
     } catch (error) {
-      console.error('Error analyzing chat:', error);
+      console.error("Error analyzing chat:", error);
       throw error;
     }
   };
@@ -310,16 +325,16 @@ Goal: Maintain character while helping practice English.`;
       const uid = auth.currentUser.uid;
       const userRef = ref(db, `users/${uid}`);
       const snapshot = await get(userRef);
-      
-      if (!snapshot.exists()) return 'A1';
+
+      if (!snapshot.exists()) return "A1";
 
       const userData = snapshot.val();
       const recentScores = userData.recentScores || [];
       const totalSessions = userData.totalSessions || 0;
-      
+
       recentScores.push({
         score,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
 
       if (recentScores.length > 10) {
@@ -330,27 +345,27 @@ Goal: Maintain character while helping practice English.`;
       const isInitialStage = totalSessions < 20;
 
       if (isInitialStage) {
-        if (userData.cefrLevel === 'A1') {
-          const highScores = recentScores.filter(s => s.score >= 60);
+        if (userData.cefrLevel === "A1") {
+          const highScores = recentScores.filter((s) => s.score >= 60);
           if (highScores.length >= 2) {
-            newLevel = 'A2';
+            newLevel = "A2";
           }
         } else {
-          const highScores = recentScores.filter(s => s.score >= 90);
+          const highScores = recentScores.filter((s) => s.score >= 90);
           if (highScores.length >= 9) {
             newLevel = getNextLevel(userData.cefrLevel);
           }
-          const lowScores = recentScores.filter(s => s.score <= 50);
+          const lowScores = recentScores.filter((s) => s.score <= 50);
           if (lowScores.length >= 6) {
             newLevel = getPreviousLevel(userData.cefrLevel);
           }
         }
       } else {
-        const highScores = recentScores.filter(s => s.score >= 80);
+        const highScores = recentScores.filter((s) => s.score >= 80);
         if (highScores.length >= 4) {
           newLevel = getNextLevel(userData.cefrLevel);
         }
-        const lowScores = recentScores.filter(s => s.score <= 60);
+        const lowScores = recentScores.filter((s) => s.score <= 60);
         if (lowScores.length >= 3) {
           newLevel = getPreviousLevel(userData.cefrLevel);
         }
@@ -361,34 +376,39 @@ Goal: Maintain character while helping practice English.`;
           cefrLevel: newLevel,
           recentScores,
           totalSessions: totalSessions + 1,
-          levelHistory: [...(userData.levelHistory || []), {
-            level: newLevel,
-            changedAt: Date.now(),
-            reason: newLevel > userData.cefrLevel ? 'upgrade' : 'downgrade'
-          }]
+          levelHistory: [
+            ...(userData.levelHistory || []),
+            {
+              level: newLevel,
+              changedAt: Date.now(),
+              reason: newLevel > userData.cefrLevel ? "upgrade" : "downgrade",
+            },
+          ],
         });
       } else {
         await update(userRef, {
           recentScores,
-          totalSessions: totalSessions + 1
+          totalSessions: totalSessions + 1,
         });
       }
 
       return newLevel;
     } catch (error) {
-      console.error('Error updating CEFR level:', error);
-      return 'A1';
+      console.error("Error updating CEFR level:", error);
+      return "A1";
     }
   };
 
   const getNextLevel = (currentLevel) => {
-    const levels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+    const levels = ["A1", "A2", "B1", "B2", "C1", "C2"];
     const currentIndex = levels.indexOf(currentLevel);
-    return currentIndex < levels.length - 1 ? levels[currentIndex + 1] : currentLevel;
+    return currentIndex < levels.length - 1
+      ? levels[currentIndex + 1]
+      : currentLevel;
   };
 
   const getPreviousLevel = (currentLevel) => {
-    const levels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+    const levels = ["A1", "A2", "B1", "B2", "C1", "C2"];
     const currentIndex = levels.indexOf(currentLevel);
     return currentIndex > 0 ? levels[currentIndex - 1] : currentLevel;
   };
@@ -397,12 +417,12 @@ Goal: Maintain character while helping practice English.`;
     if (!message.trim() || !isAuthReady || !auth.currentUser) return;
 
     const newMessage = {
-      role: 'user',
+      role: "user",
       content: message,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, newMessage]);
+    setMessages((prev) => [...prev, newMessage]);
     setInput("");
     setLoading(true);
 
@@ -417,18 +437,22 @@ Goal: Maintain character while helping practice English.`;
       const cleanResponse = removeMarkdown(responseText);
 
       const aiMessage = {
-        role: 'assistant',
+        role: "assistant",
         content: cleanResponse,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
-      setMessages(prev => [...prev, aiMessage]);
+      setMessages((prev) => [...prev, aiMessage]);
     } catch (error) {
-      console.error('AI 응답 생성 중 오류:', error);
-      setMessages(prev => [...prev, {
-        role: 'assistant',
-        content: '죄송합니다. 응답을 생성하는 중에 오류가 발생했습니다. 잠시 후 다시 시도해주세요.',
-        timestamp: new Date()
-      }]);
+      console.error("AI 응답 생성 중 오류:", error);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content:
+            "죄송합니다. 응답을 생성하는 중에 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
+          timestamp: new Date(),
+        },
+      ]);
     } finally {
       setLoading(false);
     }
@@ -446,28 +470,33 @@ Goal: Maintain character while helping practice English.`;
       try {
         await updateChatAnalysis(chatId, {
           ...analysis,
-          messages: messages.filter(msg => msg.role === 'user').map(msg => ({
-            content: msg.content,
-            timestamp: msg.timestamp
-          }))
+          messages: messages
+            .filter((msg) => msg.role === "user")
+            .map((msg) => ({
+              content: msg.content,
+              timestamp: msg.timestamp,
+            })),
         });
       } catch (error) {
-        console.error('분석 결과 저장 중 오류:', error);
+        console.error("분석 결과 저장 중 오류:", error);
       }
     } catch (error) {
-      console.error('채팅 분석 중 오류:', error);
-      setMessages(prev => [...prev, {
-        role: 'assistant',
-        content: '채팅 분석 중 오류가 발생했습니다. 다시 시도해주세요.',
-        timestamp: new Date()
-      }]);
+      console.error("채팅 분석 중 오류:", error);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: "채팅 분석 중 오류가 발생했습니다. 다시 시도해주세요.",
+          timestamp: new Date(),
+        },
+      ]);
     } finally {
       setIsCompleting(false);
     }
   };
 
   const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage(input);
     }
@@ -482,69 +511,83 @@ Goal: Maintain character while helping practice English.`;
   }
 
   if (!selectedScenario) {
-    return <ScenarioSelector onSelect={setSelectedScenario} character={character} />;
+    return (
+      <ScenarioSelector onSelect={setSelectedScenario} character={character} />
+    );
   }
 
   return (
-      <div className={styles.root}>
-        <div className={styles.header}>
-          <button onClick={onBack} className={styles.backBtn}>←</button>
-          <img src={character.imageUrl} alt={character.name} className={styles.avatar} />
-          <div className={styles.title}>{character.name}</div>
-          <button
-              onClick={handleFinishChat}
-              className={`${styles.completeBtn} ${isCompleting ? styles.completing : ''}`}
-              disabled={!chatId || isCompleting}
-          >
-            {isCompleting ? "처리 중..." : "오답 노트"}
-          </button>
-        </div>
-        <div className={styles.messages}>
-          {messages.map((msg, idx) => (
-              <div key={idx} className={styles["bubble" + (msg.role === "user" ? "Me" : "Other")]}>
-                {msg.content}
-              </div>
-          ))}
-          {loading && (
-              <div className={styles.bubbleOther}>
-                <div className={styles.typingIndicator}>
-                  <div className={styles.typingDot} />
-                  <div className={styles.typingDot} />
-                  <div className={styles.typingDot} />
-                </div>
-              </div>
-          )}
-          <div ref={chatEndRef} />
-        </div>
-        <div className={styles.inputbar}>
-          <input
-              ref={inputRef}
-              id="chat-input"
-              name="chat-input"
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              onKeyDown={handleKeyPress}
-              placeholder="대화를 시작하세요."
-              disabled={loading}
-              autoComplete="off"
-          />
-          <button
-              onClick={() => handleSendMessage(input)}
-              className={styles.sendBtn}
-              disabled={loading || !input.trim()}
-          >
-            전송
-          </button>
-        </div>
-        {showAnalysis && analysis && (
-            <AnalysisModal
-                analysis={analysis}
-                onClose={() => setShowAnalysis(false)}
-            />
-        )}
+    <div className={styles.root}>
+      <div className={styles.header}>
+        <button onClick={onBack} className={styles.backBtn}>
+          ←
+        </button>
+        <img
+          src={character.imageUrl}
+          alt={character.name}
+          className={styles.avatar}
+        />
+        <div className={styles.title}>{character.name}</div>
+        <button
+          onClick={handleFinishChat}
+          className={`${styles.completeBtn} ${
+            isCompleting ? styles.completing : ""
+          }`}
+          disabled={!chatId || isCompleting}
+        >
+          {isCompleting ? "처리 중..." : "오답 노트"}
+        </button>
       </div>
+      <div className={styles.messages}>
+        {messages.map((msg, idx) => (
+          <div
+            key={idx}
+            className={
+              styles["bubble" + (msg.role === "user" ? "Me" : "Other")]
+            }
+          >
+            {msg.content}
+          </div>
+        ))}
+        {loading && (
+          <div className={styles.bubbleOther}>
+            <div className={styles.typingIndicator}>
+              <div className={styles.typingDot} />
+              <div className={styles.typingDot} />
+              <div className={styles.typingDot} />
+            </div>
+          </div>
+        )}
+        <div ref={chatEndRef} />
+      </div>
+      <div className={styles.inputbar}>
+        <input
+          ref={inputRef}
+          id="chat-input"
+          name="chat-input"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={handleKeyPress}
+          placeholder="대화를 시작하세요."
+          disabled={loading}
+          autoComplete="off"
+        />
+        <button
+          onClick={() => handleSendMessage(input)}
+          className={styles.sendBtn}
+          disabled={loading || !input.trim()}
+        >
+          전송
+        </button>
+      </div>
+      {showAnalysis && analysis && (
+        <AnalysisModal
+          analysis={analysis}
+          onClose={() => setShowAnalysis(false)}
+        />
+      )}
+    </div>
   );
 }
 
 export default ChatRoom;
-
