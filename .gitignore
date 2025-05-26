@@ -68,5 +68,7 @@ assets/config/.env
 /windows/*
 /windows
 
+web/web_chat/node_modules/*
+/web/web_chat/node_modules/*
 
 /services/gemini_service.dart
