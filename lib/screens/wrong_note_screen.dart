@@ -10,9 +10,7 @@ class WrongNoteScreen extends StatelessWidget {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return [];
 
-    final dbRef = FirebaseDatabase.instance.ref(
-      'users/6aXZoouLskON99JvBbqflAZXy5u1/wrongNote',
-    );
+    final dbRef = FirebaseDatabase.instance.ref('users/${user.uid}/wrongNote');
     final snapshot = await dbRef.get();
 
     if (!snapshot.exists) return [];
