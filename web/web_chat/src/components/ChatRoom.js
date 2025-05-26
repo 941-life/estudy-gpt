@@ -113,19 +113,13 @@ function ChatRoom({ character, onBack }) {
   const [showAnalysis, setShowAnalysis] = useState(false);
   const [analysis, setAnalysis] = useState(null);
   const [userLevel, setUserLevel] = useState("A1");
-  const [isAuthReady, setIsAuthReady] = useState(false);
   const chatEndRef = useRef(null);
   const inputRef = useRef(null);
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      setIsAuthReady(!!user);
-      if (user) {
-        initUserData();
-      }
-    });
-
-    return () => unsubscribe();
+    if (auth.currentUser) {
+      initUserData();
+    }
   }, []);
 
   const initUserData = async () => {
@@ -394,7 +388,7 @@ Goal: Maintain character while helping practice English.`;
   };
 
   const handleSendMessage = async (message) => {
-    if (!message.trim() || !isAuthReady || !auth.currentUser) return;
+    if (!message.trim() || !auth.currentUser) return;
 
     const newMessage = {
       role: 'user',
@@ -473,7 +467,7 @@ Goal: Maintain character while helping practice English.`;
     }
   };
 
-  if (!isAuthReady) {
+  if (!auth.currentUser) {
     return (
       <div className={styles.loadingContainer}>
         <div className={styles.loadingSpinner} />
