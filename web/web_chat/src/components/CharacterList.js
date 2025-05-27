@@ -40,29 +40,35 @@ function CharacterList({ characters, onSelect, userInfo, globalUid }) {
     onSelect(character);
   };
 
+  const getLatestScore = () => {
+    if (!userInfo?.recentScores?.length) return null;
+    const latestScore = userInfo.recentScores[userInfo.recentScores.length - 1];
+    return typeof latestScore === 'object' ? latestScore.score : latestScore;
+  };
+
   return (
     <>
       <div className={styles.appbar}>
         <span className={styles.title}>Chat</span>
         {userInfo && (
           <div className={styles.userInfo}>
-            <span className={styles.userLevel}>레벨: {userInfo.cefrLevel}</span>
-            <span className={styles.sessionCount}>
-              세션: {userInfo.totalSessions || 0}
-            </span>
+            <div className={styles.userStats}>
+              <div className={styles.statItem}>
+                <span className={styles.statLabel}>레벨</span>
+                <span className={styles.statValue}>{userInfo.cefrLevel}</span>
+              </div>
+              {userInfo.recentScores && userInfo.recentScores.length > 0 && (
+                <div className={styles.statItem}>
+                  <span className={styles.statLabel}>최근 점수</span>
+                  <span className={styles.statValue}>{getLatestScore()}점</span>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
       <div className={styles.list}>
         <div className={styles.selectTitle}>대화할 친구를 선택하세요</div>
-        {userInfo &&
-          userInfo.recentScores &&
-          userInfo.recentScores.length > 0 && (
-            <div className={styles.recentScore}>
-              최근 점수:{" "}
-              {userInfo.recentScores[userInfo.recentScores.length - 1]}점
-            </div>
-          )}
         {characters.map((character, index) => (
           <CharacterListItem
             key={character.id}

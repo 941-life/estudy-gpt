@@ -189,13 +189,15 @@ function App() {
     return (
       <div className={styles.loadingContainer}>
         <div className={styles.loadingSpinner} />
-        <p>
-          Initializing...{" "}
-          {userData ? `Received UUID: ${userData.uuid}` : "Waiting for data..."}
-        </p>
-        {userData && (
-          <p className={styles.loadingDetail}>Processing user data...</p>
-        )}
+        <div className={styles.loadingText}>
+          {userData ? "사용자 정보를 불러오는 중입니다" : "잠시만 기다려주세요"}
+          <div className={styles.loadingDetail}>
+            {userData ? "곧 시작됩니다" : "인증 중입니다."}
+          </div>
+        </div>
+        <div className={styles.loadingProgress}>
+          <div className={styles.loadingProgressBar} />
+        </div>
       </div>
     );
   }
@@ -205,7 +207,15 @@ function App() {
     return (
       <div className={styles.loadingContainer}>
         <div className={styles.loadingSpinner} />
-        <p>Loading user information...</p>
+        <div className={styles.loadingText}>
+          사용자 정보를 불러오는 중입니다
+          <div className={styles.loadingDetail}>
+            잠시만 기다려주세요
+          </div>
+        </div>
+        <div className={styles.loadingProgress}>
+          <div className={styles.loadingProgressBar} />
+        </div>
       </div>
     );
   }
