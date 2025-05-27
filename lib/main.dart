@@ -4,6 +4,7 @@ import 'package:calendar_view/calendar_view.dart';
 import 'package:estudy_gpt/models/calendar_event.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 // import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'screens/login_screen.dart';
@@ -15,6 +16,10 @@ import 'screens/splash_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+
+  if (Platform.isAndroid) {
+    await InAppWebViewController.setWebContentsDebuggingEnabled(true);
+  }
 
   // 상태바 스타일 설정
   SystemChrome.setSystemUIOverlayStyle(
