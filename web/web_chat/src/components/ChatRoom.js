@@ -7,63 +7,6 @@ import AnalysisModal from "./AnalysisModal";
 import { auth, db } from "../firebase/firebaseConfig";
 import { get, ref, update } from "firebase/database";
 
-const CEFR_CRITERIA = {
-  'A1': {
-    score: [0, 30],
-    criteria: [
-      'Can use basic vocabulary and simple phrases',
-      'Can understand and use familiar everyday expressions',
-      'Can introduce themselves and others',
-      'Can ask and answer simple questions about personal details'
-    ]
-  },
-  'A2': {
-    score: [31, 50],
-    criteria: [
-      'Can communicate in simple and routine tasks',
-      'Can describe in simple terms aspects of their background',
-      'Can handle short social exchanges',
-      'Can understand sentences and frequently used expressions'
-    ]
-  },
-  'B1': {
-    score: [51, 70],
-    criteria: [
-      'Can deal with most situations likely to arise while traveling',
-      'Can produce simple connected text on familiar topics',
-      'Can describe experiences, events, dreams, and ambitions',
-      'Can give reasons and explanations for opinions and plans'
-    ]
-  },
-  'B2': {
-    score: [71, 85],
-    criteria: [
-      'Can interact with a degree of fluency and spontaneity',
-      'Can produce clear, detailed text on a wide range of subjects',
-      'Can explain a viewpoint on a topical issue',
-      'Can understand the main ideas of complex text'
-    ]
-  },
-  'C1': {
-    score: [86, 95],
-    criteria: [
-      'Can express ideas fluently and spontaneously',
-      'Can use language flexibly and effectively for social and professional purposes',
-      'Can produce clear, well-structured, detailed text on complex subjects',
-      'Can understand implicit meaning'
-    ]
-  },
-  'C2': {
-    score: [96, 100],
-    criteria: [
-      'Can understand with ease virtually everything heard or read',
-      'Can summarize information from different sources',
-      'Can express themselves spontaneously, very fluently and precisely',
-      'Can differentiate finer shades of meaning'
-    ]
-  }
-};
-
 const LEVEL_ADJUSTMENTS = {
   'A1': {
     vocab: 'basic (up to 500 words)',
