@@ -294,28 +294,43 @@ class WrongNoteScreen extends StatelessWidget {
                             Container(
                               width: double.infinity,
                               decoration: BoxDecoration(
-                                color: Colors.yellow.shade100,
+                                color: Colors.yellow.shade50,
                                 borderRadius: BorderRadius.circular(
-                                  width * 0.025,
+                                  width * 0.03,
                                 ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.05),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
                               ),
-                              padding: EdgeInsets.all(width * 0.03),
-                              margin: EdgeInsets.only(top: height * 0.006),
+                              padding: EdgeInsets.symmetric(
+                                horizontal: width * 0.04,
+                                vertical: width * 0.035,
+                              ),
+                              margin: EdgeInsets.only(
+                                top: height * 0.012,
+                                bottom: height * 0.008,
+                              ),
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Icon(
-                                    Icons.lightbulb,
-                                    color: Colors.amber,
-                                    size: width * 0.06,
+                                    Icons.lightbulb_outline,
+                                    color: Colors.amber.shade600,
+                                    size: width * 0.062,
                                   ),
-                                  SizedBox(width: width * 0.02),
+                                  SizedBox(width: width * 0.032),
                                   Expanded(
                                     child: Text(
                                       note['summary'],
                                       style: TextStyle(
-                                        fontSize: width * 0.042,
+                                        fontSize: width * 0.044,
+                                        height: 1.4,
                                         fontWeight: FontWeight.w500,
+                                        color: Colors.black87,
                                       ),
                                     ),
                                   ),
