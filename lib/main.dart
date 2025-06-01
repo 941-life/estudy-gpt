@@ -15,6 +15,7 @@ import 'screens/splash_screen.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'widgets/challenge_calendar_widget.dart';
+import 'package:flutter/foundation.dart' show debugPrint;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -90,7 +91,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         );
       }
     } catch (e) {
-      print('Widget update error: $e');
+      debugPrint('Widget update error: $e');
     }
   }
 
@@ -257,23 +258,6 @@ class _AppContentState extends State<AppContent> {
       },
     );
     _sharedIntentHandler.init();
-  }
-
-  void _showErrorDialog(String title, String message) {
-    showDialog(
-      context: context,
-      builder:
-          (_) => AlertDialog(
-            title: Text(title),
-            content: Text(message),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('확인'),
-              ),
-            ],
-          ),
-    );
   }
 
   @override

@@ -5,7 +5,6 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:estudy_gpt/widgets/common_app_bar.dart';
 
 import 'package:flutter/material.dart';
-import 'package:estudy_gpt/models/shared_data.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:estudy_gpt/services/gemini_service.dart';
 import 'package:path/path.dart' as path;
@@ -35,8 +34,6 @@ enum ContentType { text, document, unknown }
 
 class _PersonalScreenState extends State<PersonalScreen> {
   final GeminiService _geminiService = GeminiService();
-  List<SharedData> _history = [];
-  bool _showHistory = false;
   bool _isLoading = false;
   String? _result;
   LangOption? _selectedOption;
@@ -46,7 +43,6 @@ class _PersonalScreenState extends State<PersonalScreen> {
   ContentType _contentType = ContentType.unknown;
   String _extractedText = '';
   String? _documentPath;
-  bool _isProcessingFile = false;
   String _userLevel = 'A1';
 
   @override
@@ -112,7 +108,7 @@ class _PersonalScreenState extends State<PersonalScreen> {
     String extension,
   ) async {
     setState(() {
-      _isProcessingFile = true;
+      _isLoading = true;
     });
 
     try {
@@ -141,7 +137,7 @@ class _PersonalScreenState extends State<PersonalScreen> {
       _detectedLang = 'ko';
     } finally {
       setState(() {
-        _isProcessingFile = false;
+        _isLoading = false;
       });
     }
   }
@@ -634,38 +630,6 @@ class _PersonalScreenState extends State<PersonalScreen> {
             ),
         ],
       ),
-    );
-  }
-
-  Widget _buildUnsupportedFilesContent() {
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: widget.sharedFiles.length,
-      itemBuilder:
-          (ctx, i) => Card(
-            margin: const EdgeInsets.symmetric(vertical: 8),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            elevation: 2,
-            child: ListTile(
-              leading: Icon(Icons.insert_drive_file, color: Colors.blue[400]),
-              title: Text(
-                widget.sharedFiles[i].path.split('/').last,
-                style: const TextStyle(fontWeight: FontWeight.w600),
-              ),
-              subtitle: Text(
-                _detectedLang == 'ko'
-                    ? '지원되지 않는 파일 형식입니다.'
-                    : 'Unsupported file format.',
-                style: const TextStyle(color: Colors.grey),
-              ),
-              trailing: IconButton(
-                icon: const Icon(Icons.share, color: Colors.blue),
-                onPressed: () => _shareFile(widget.sharedFiles[i].path),
-              ),
-            ),
-          ),
     );
   }
 

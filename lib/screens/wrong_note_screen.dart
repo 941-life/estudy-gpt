@@ -80,10 +80,6 @@ class WrongNoteScreen extends StatelessWidget {
             itemCount: notes.length,
             itemBuilder: (context, idx) {
               final note = notes[idx];
-              final messages =
-                  (note['messages'] as List<dynamic>?)
-                      ?.map((m) => m['content']?.toString() ?? '')
-                      .toList();
               final corrections = note['corrections'] as List<dynamic>?;
 
               return Card(

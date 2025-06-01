@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:intl/intl.dart';
-import '../models/wrong_note.dart';
 import 'challenge_calendar.dart';
+import 'package:flutter/foundation.dart' show debugPrint;
 
 // 위젯 업데이트를 위한 상수
 const String appGroupId = 'group.com.estudygpt';
@@ -46,7 +46,7 @@ class ChallengeCalendarWidget {
       if (uri?.host == 'WIDGET_CLICK') {
         // 앱이 이미 실행 중인지 확인하고 적절한 처리
         // 여기서는 별도의 처리가 필요 없음 (Android에서 처리)
-        print('Widget clicked: $uri');
+        debugPrint('Widget clicked: $uri');
       }
     });
   }

@@ -19,8 +19,8 @@ class ChallengeCalendar extends StatefulWidget {
   static String getMotivationalMessage(bool hasCreatedNote) {
     if (hasCreatedNote) {
       final messages = [
-        '오늘의 학습을 완료했어요! 대단해요! 🎉',
-        '훌륭해요! 오늘도 성장하는 하루였어요! ✨',
+        '오늘의 학습 완료! 대단해요! 🎉',
+        '오늘도 성장하는 하루였어요! ✨',
         '학습 목표 달성! 내일도 이 기세로! 🌟'
       ];
       return messages[DateTime.now().microsecond % messages.length];
@@ -178,27 +178,6 @@ class _ChallengeCalendarState extends State<ChallengeCalendar> {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildChip(String label) {
-    final hasCreatedNote = _hasCreatedTodayNote();
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: hasCreatedNote ? Colors.green.shade50 : Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: hasCreatedNote ? Colors.green.shade200 : Colors.grey.shade200,
-        ),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 13,
-          color: hasCreatedNote ? Colors.green.shade700 : Colors.black87,
         ),
       ),
     );

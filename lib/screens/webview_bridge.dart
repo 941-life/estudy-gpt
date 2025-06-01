@@ -23,7 +23,6 @@ class WebViewBridge extends StatefulWidget {
 
 class _WebViewBridgeState extends State<WebViewBridge> {
   late final WebViewController _controller;
-  String _pageTitle = '';
 
   @override
   void initState() {
@@ -47,13 +46,8 @@ class _WebViewBridgeState extends State<WebViewBridge> {
                 _sendUserDataToReact();
                 // 페이지 타이틀 가져오기
                 final title = await _controller.getTitle();
-                if (title != null && title.isNotEmpty) {
-                  setState(() {
-                    _pageTitle = title;
-                  });
-                  if (widget.onTitleChanged != null) {
-                    widget.onTitleChanged!(title);
-                  }
+                if (title != null && title.isNotEmpty && widget.onTitleChanged != null) {
+                  widget.onTitleChanged!(title);
                 }
               },
             ),

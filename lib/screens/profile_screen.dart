@@ -16,8 +16,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String _selectedChallenge = '';  // 빈 문자열로 초기화
   final DateTime _today = DateTime.now();
   Map<DateTime, List<WrongNote>> _wrongNotes = {};
-  bool _isLoading = true;
-  int _daysStudied = 0;  // 학습 일수를 저장할 변수
   
   @override
   void initState() {
@@ -26,7 +24,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _loadWrongNotes() async {
-    setState(() => _isLoading = true);
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) return;
@@ -73,32 +70,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
           final daysSinceStart = now.difference(firstNoteDate).inDays + 1;
           setState(() {
             _wrongNotes = tempNotes;
-            _daysStudied = daysSinceStart;
             _selectedChallenge = '$daysSinceStart days with English';
-            _isLoading = false;
           });
         } else {
           setState(() {
             _wrongNotes = tempNotes;
-            _daysStudied = 0;
             _selectedChallenge = 'Start your English journey';
-            _isLoading = false;
           });
         }
       } else {
         setState(() {
           _wrongNotes = {};
-          _daysStudied = 0;
           _selectedChallenge = 'Start your English journey';
-          _isLoading = false;
         });
       }
     } catch (e) {
       setState(() {
         _wrongNotes = {};
-        _daysStudied = 0;
         _selectedChallenge = 'Error loading data';
-        _isLoading = false;
       });
     }
   }

@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'webview_bridge.dart';
 import 'login_screen.dart';
-import 'calendar_screen.dart';
 
 class MainScreen extends StatefulWidget {
   final User? user;
@@ -29,7 +28,6 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
   late List<WebViewBridge> _webViews;
-  String _webTitle = '';
 
   @override
   void initState() {
@@ -45,7 +43,7 @@ class _MainScreenState extends State<MainScreen> {
         user: widget.user,
         initialUrl: 'https://estudy-5b2ba.web.app/',
         // initialUrl: 'http://192.168.1.2:3000',
-        onTitleChanged: (_) => setState(() => _webTitle = 'Chat'),
+        onTitleChanged: (_) {},
       ),
     ];
   }
@@ -61,11 +59,6 @@ class _MainScreenState extends State<MainScreen> {
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
-      if (index == 1) {
-        _webTitle = 'Chat';
-      } else if (index == 2) {
-        _webTitle = 'Wrong note';
-      }
     });
   }
 
