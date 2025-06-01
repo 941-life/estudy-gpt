@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:estudy_gpt/widgets/common_app_bar.dart';
+import 'package:estudy_gpt/widgets/challenge_calendar_widget.dart';
+import 'package:intl/intl.dart';
 
 class WrongNoteScreen extends StatelessWidget {
   const WrongNoteScreen({super.key});
@@ -13,18 +15,42 @@ class WrongNoteScreen extends StatelessWidget {
     final dbRef = FirebaseDatabase.instance.ref('users/${user.uid}/wrongNote');
     final snapshot = await dbRef.get();
 
-    if (!snapshot.exists) return [];
+    if (!snapshot.exists) {
+      // 오답노트가 없을 때 위젯 업데이트
+      await ChallengeCalendarWidget.updateWidget(
+        hasCreatedNote: false,
+        currentDate: DateTime.now(),
+      );
+      return [];
+    }
 
     List<Map<String, dynamic>> notes = [];
+    bool hasCreatedNoteToday = false;
+    final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    
     for (final child in snapshot.children) {
       final value = child.value;
       if (value is Map<dynamic, dynamic>) {
-        notes.add({
+        final note = {
           'id': child.key,
           ...value.map((k, v) => MapEntry(k.toString(), v)),
-        });
+        };
+        notes.add(note);
+        
+        // 오늘 생성된 노트가 있는지 확인
+        final noteDate = DateTime.parse(note['analyzedAt'].toString()).toLocal();
+        if (DateFormat('yyyy-MM-dd').format(noteDate) == today) {
+          hasCreatedNoteToday = true;
+        }
       }
     }
+
+    // 위젯 업데이트
+    await ChallengeCalendarWidget.updateWidget(
+      hasCreatedNote: hasCreatedNoteToday,
+      currentDate: DateTime.now(),
+    );
+
     return notes;
   }
 
@@ -80,75 +106,78 @@ class WrongNoteScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           // 상단 뱃지 영역
-                          Row(
-                            children: [
-                              if (note['previousCefrLevel'] != null &&
-                                  note['newCefrLevel'] != null)
-                                Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: width * 0.025,
-                                    vertical: height * 0.008,
-                                  ),
-                                  margin: EdgeInsets.only(right: width * 0.02),
-                                  decoration: BoxDecoration(
-                                    color: Colors.blue.shade50,
-                                    borderRadius: BorderRadius.circular(
-                                      width * 0.03,
+                          SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children: [
+                                if (note['previousCefrLevel'] != null &&
+                                    note['newCefrLevel'] != null)
+                                  Container(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: width * 0.025,
+                                      vertical: height * 0.008,
+                                    ),
+                                    margin: EdgeInsets.only(right: width * 0.02),
+                                    decoration: BoxDecoration(
+                                      color: Colors.blue.shade50,
+                                      borderRadius: BorderRadius.circular(
+                                        width * 0.03,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      '레벨: ${note['previousCefrLevel']} → ${note['newCefrLevel']}',
+                                      style: TextStyle(
+                                        color: Colors.blue,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: width * 0.035,
+                                      ),
                                     ),
                                   ),
-                                  child: Text(
-                                    '레벨: ${note['previousCefrLevel']} → ${note['newCefrLevel']}',
-                                    style: TextStyle(
-                                      color: Colors.blue,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: width * 0.035,
+                                if (note['score'] != null)
+                                  Container(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: width * 0.025,
+                                      vertical: height * 0.008,
+                                    ),
+                                    margin: EdgeInsets.only(right: width * 0.02),
+                                    decoration: BoxDecoration(
+                                      color: Colors.green.shade50,
+                                      borderRadius: BorderRadius.circular(
+                                        width * 0.03,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      '점수: ${note['score']}',
+                                      style: TextStyle(
+                                        color: Colors.green,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: width * 0.035,
+                                      ),
                                     ),
                                   ),
-                                ),
-                              if (note['score'] != null)
-                                Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: width * 0.025,
-                                    vertical: height * 0.008,
-                                  ),
-                                  margin: EdgeInsets.only(right: width * 0.02),
-                                  decoration: BoxDecoration(
-                                    color: Colors.green.shade50,
-                                    borderRadius: BorderRadius.circular(
-                                      width * 0.03,
+                                if (note['analyzedAt'] != null)
+                                  Container(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: width * 0.025,
+                                      vertical: height * 0.008,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.shade200,
+                                      borderRadius: BorderRadius.circular(
+                                        width * 0.03,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      '분석일: ${(note['analyzedAt'] as String).split("T").first}',
+                                      style: TextStyle(
+                                        color: Colors.black54,
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: width * 0.032,
+                                      ),
                                     ),
                                   ),
-                                  child: Text(
-                                    '점수: ${note['score']}',
-                                    style: TextStyle(
-                                      color: Colors.green,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: width * 0.035,
-                                    ),
-                                  ),
-                                ),
-                              if (note['analyzedAt'] != null)
-                                Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: width * 0.025,
-                                    vertical: height * 0.008,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey.shade200,
-                                    borderRadius: BorderRadius.circular(
-                                      width * 0.03,
-                                    ),
-                                  ),
-                                  child: Text(
-                                    '분석일: ${(note['analyzedAt'] as String).split("T").first}',
-                                    style: TextStyle(
-                                      color: Colors.black54,
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: width * 0.032,
-                                    ),
-                                  ),
-                                ),
-                            ],
+                              ],
+                            ),
                           ),
                           SizedBox(height: height * 0.012),
                           // 수정 사항 영역
@@ -205,12 +234,14 @@ class WrongNoteScreen extends StatelessWidget {
                                                     fontSize: width * 0.038,
                                                   ),
                                                 ),
-                                                Text(
-                                                  cor['original']?.toString() ??
-                                                      '',
-                                                  style: TextStyle(
-                                                    color: Colors.black87,
-                                                    fontSize: width * 0.038,
+                                                Expanded(
+                                                  child: Text(
+                                                    cor['original']?.toString() ?? '',
+                                                    style: TextStyle(
+                                                      color: Colors.black87,
+                                                      fontSize: width * 0.038,
+                                                    ),
+                                                    softWrap: true,
                                                   ),
                                                 ),
                                               ],
@@ -225,14 +256,15 @@ class WrongNoteScreen extends StatelessWidget {
                                                     fontSize: width * 0.038,
                                                   ),
                                                 ),
-                                                Text(
-                                                  cor['corrected']
-                                                          ?.toString() ??
-                                                      '',
-                                                  style: TextStyle(
-                                                    color: Colors.green,
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: width * 0.038,
+                                                Expanded(
+                                                  child: Text(
+                                                    cor['corrected']?.toString() ?? '',
+                                                    style: TextStyle(
+                                                      color: Colors.green,
+                                                      fontWeight: FontWeight.bold,
+                                                      fontSize: width * 0.038,
+                                                    ),
+                                                    softWrap: true,
                                                   ),
                                                 ),
                                               ],
