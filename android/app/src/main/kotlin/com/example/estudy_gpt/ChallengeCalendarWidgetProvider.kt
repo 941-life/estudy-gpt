@@ -3,6 +3,8 @@ package com.example.estudy_gpt
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
+import android.content.Intent
+import android.app.PendingIntent
 import android.widget.RemoteViews
 import es.antonborri.home_widget.HomeWidgetPlugin
 
@@ -28,6 +30,21 @@ class ChallengeCalendarWidgetProvider : AppWidgetProvider() {
 
             // 메시지 업데이트
             views.setTextViewText(R.id.widget_message, message)
+
+            // 클릭 이벤트 설정
+            val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)?.apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                action = "WIDGET_CLICK"
+            }
+            val pendingIntent = PendingIntent.getActivity(
+                context,
+                0,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
+            // 위젯 전체에 클릭 리스너 설정
+            views.setOnClickPendingIntent(R.id.widget_layout, pendingIntent)
 
             // 위젯 업데이트
             appWidgetManager.updateAppWidget(widgetId, views)

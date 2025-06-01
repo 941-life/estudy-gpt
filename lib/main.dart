@@ -12,6 +12,9 @@ import 'screens/main_screen.dart';
 import 'utils/shared_intent_handler.dart';
 import "dart:io";
 import 'screens/splash_screen.dart';
+import 'package:intl/intl.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'widgets/challenge_calendar_widget.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,8 +36,63 @@ void main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _updateWidget();
+    }
+  }
+
+  Future<void> _updateWidget() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        final dbRef = FirebaseDatabase.instance.ref(
+          'users/${user.uid}/wrongNote',
+        );
+        final snapshot = await dbRef.get();
+        
+        final today = DateTime.now();
+        final dateStr = DateFormat('yyyy-MM-dd').format(today);
+        
+        bool hasNote = false;
+        if (snapshot.exists) {
+          final data = snapshot.value as Map<dynamic, dynamic>;
+          hasNote = data.values.any((note) {
+            final noteDate = DateTime.parse(note['date'].toString()).toLocal();
+            return DateFormat('yyyy-MM-dd').format(noteDate) == dateStr;
+          });
+        }
+
+        await ChallengeCalendarWidget.updateWidget(
+          hasCreatedNote: hasNote,
+          currentDate: today,
+        );
+      }
+    } catch (e) {
+      print('Widget update error: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

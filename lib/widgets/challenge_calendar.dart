@@ -16,6 +16,24 @@ class ChallengeCalendar extends StatefulWidget {
     required this.onDateSelected,
   });
 
+  static String getMotivationalMessage(bool hasCreatedNote) {
+    if (hasCreatedNote) {
+      final messages = [
+        '오늘의 학습을 완료했어요! 대단해요! 🎉',
+        '훌륭해요! 오늘도 성장하는 하루였어요! ✨',
+        '학습 목표 달성! 내일도 이 기세로! 🌟'
+      ];
+      return messages[DateTime.now().microsecond % messages.length];
+    } else {
+      final messages = [
+        '아직 오늘의 학습을 시작하지 않았어요!',
+        '새로운 도전이 기다리고 있어요!',
+        '오늘의 학습으로 한 걸음 더 성장해보세요!'
+      ];
+      return messages[DateTime.now().microsecond % messages.length];
+    }
+  }
+
   @override
   State<ChallengeCalendar> createState() => _ChallengeCalendarState();
 }
@@ -53,24 +71,6 @@ class _ChallengeCalendarState extends State<ChallengeCalendar> {
   bool _hasCreatedTodayNote() {
     final now = DateTime.now();
     return _hasWrongNotesForDate(now);
-  }
-
-  String _getMotivationalMessage(bool hasCreatedNote) {
-    if (hasCreatedNote) {
-      final messages = [
-        '오늘의 학습을 완료했어요! 대단해요! 🎉',
-        '훌륭해요! 오늘도 성장하는 하루였어요! ✨',
-        '학습 목표 달성! 내일도 이 기세로! 🌟'
-      ];
-      return messages[DateTime.now().microsecond % messages.length];
-    } else {
-      final messages = [
-        '아직 오늘의 학습을 시작하지 않았어요!',
-        '새로운 도전이 기다리고 있어요!',
-        '오늘의 학습으로 한 걸음 더 성장해보세요!'
-      ];
-      return messages[DateTime.now().microsecond % messages.length];
-    }
   }
 
   @override
@@ -136,7 +136,7 @@ class _ChallengeCalendarState extends State<ChallengeCalendar> {
 
   Widget _buildTodayTask() {
     final hasCreatedNote = _hasCreatedTodayNote();
-    final motivationalMessage = _getMotivationalMessage(hasCreatedNote);
+    final motivationalMessage = ChallengeCalendar.getMotivationalMessage(hasCreatedNote);
 
     return Card(
       elevation: 2,
