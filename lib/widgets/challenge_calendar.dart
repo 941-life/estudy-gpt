@@ -93,9 +93,11 @@ class _ChallengeCalendarState extends State<ChallengeCalendar> {
                   children: [
                     Text(
                       widget.title,
-                      style: const TextStyle(
-                        fontSize: 18,
+                      style: TextStyle(
+                        fontSize: 20,
                         fontWeight: FontWeight.bold,
+                        color: Colors.blue[700],
+                        letterSpacing: 0.5,
                       ),
                     ),
                     Container(
@@ -106,9 +108,13 @@ class _ChallengeCalendarState extends State<ChallengeCalendar> {
                       decoration: BoxDecoration(
                         color: Colors.blue.shade50,
                         borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: Colors.blue.shade100,
+                          width: 1,
+                        ),
                       ),
                       child: const Text(
-                        'Nice pace!',
+                        'Keep going!',
                         style: TextStyle(
                           color: Colors.blue,
                           fontWeight: FontWeight.w600,

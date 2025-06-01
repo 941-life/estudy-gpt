@@ -13,10 +13,11 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  String _selectedChallenge = '21 days with English';
+  String _selectedChallenge = '';  // 빈 문자열로 초기화
   final DateTime _today = DateTime.now();
   Map<DateTime, List<WrongNote>> _wrongNotes = {};
   bool _isLoading = true;
+  int _daysStudied = 0;  // 학습 일수를 저장할 변수
   
   @override
   void initState() {
@@ -37,6 +38,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       if (snapshot.exists) {
         final Map<DateTime, List<WrongNote>> tempNotes = {};
+        DateTime? firstNoteDate;
         
         for (final child in snapshot.children) {
           final value = child.value;
@@ -53,6 +55,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
               wrongNote.analyzedAt.day,
             );
             
+            // 첫 노트 날짜 업데이트
+            if (firstNoteDate == null || dateOnly.isBefore(firstNoteDate)) {
+              firstNoteDate = dateOnly;
+            }
+            
             if (tempNotes[dateOnly] == null) {
               tempNotes[dateOnly] = [];
             }
@@ -60,14 +67,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
           }
         }
 
+        // 학습 일수 계산 (첫 노트부터 현재까지)
+        if (firstNoteDate != null) {
+          final now = DateTime.now();
+          final daysSinceStart = now.difference(firstNoteDate).inDays + 1;
+          setState(() {
+            _wrongNotes = tempNotes;
+            _daysStudied = daysSinceStart;
+            _selectedChallenge = '$daysSinceStart days with English';
+            _isLoading = false;
+          });
+        } else {
+          setState(() {
+            _wrongNotes = tempNotes;
+            _daysStudied = 0;
+            _selectedChallenge = 'Start your English journey';
+            _isLoading = false;
+          });
+        }
+      } else {
         setState(() {
-          _wrongNotes = tempNotes;
+          _wrongNotes = {};
+          _daysStudied = 0;
+          _selectedChallenge = 'Start your English journey';
           _isLoading = false;
         });
       }
     } catch (e) {
-      print('Error loading wrong notes: $e');
-      setState(() => _isLoading = false);
+      setState(() {
+        _wrongNotes = {};
+        _daysStudied = 0;
+        _selectedChallenge = 'Error loading data';
+        _isLoading = false;
+      });
     }
   }
 
