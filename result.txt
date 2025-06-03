@@ -1,0 +1,36 @@
+lib
+├── firebase_options.dart
+├── main.dart
+├── models
+│   ├── calendar_event.dart
+│   ├── shared_data.dart
+│   └── wrong_note.dart
+├── screens
+│   ├── calendar_screen.dart
+│   ├── initial_media_screen.dart
+│   ├── login_screen.dart
+│   ├── main_screen.dart
+│   ├── media_stream_screen.dart
+│   ├── method_text_screen.dart
+│   ├── personal_screen.dart
+│   ├── profile_screen.dart
+│   ├── setting_screen.dart
+│   ├── splash_screen.dart
+│   ├── webview_bridge.dart
+│   └── wrong_note_screen.dart
+├── services
+│   └── gemini_service.dart
+├── temp.dart
+├── utils
+│   ├── firebase_utils.dart
+│   ├── local_storage.dart
+│   ├── shared_intent_handler.dart
+│   └── webview_utils.dart
+└── widgets
+    ├── challenge_calendar.dart
+    ├── challenge_calendar_widget.dart
+    ├── common_app_bar.dart
+    ├── markdown_widget.dart
+    └── user_info_title.dart
+
+5 directories, 28 files
