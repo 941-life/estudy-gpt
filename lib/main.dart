@@ -72,10 +72,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           'users/${user.uid}/wrongNote',
         );
         final snapshot = await dbRef.get();
-        
+
         final today = DateTime.now();
         final dateStr = DateFormat('yyyy-MM-dd').format(today);
-        
+
         bool hasNote = false;
         if (snapshot.exists) {
           final data = snapshot.value as Map<dynamic, dynamic>;
@@ -152,9 +152,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           ),
         ),
       ),
-      home: CalendarControllerProvider(
-        controller: EventController(),
-        child: const AppContent(),
+      home: SafeArea(
+        child: CalendarControllerProvider(
+          controller: EventController(),
+          child: const AppContent(),
+        ),
       ),
       debugShowCheckedModeBanner: false,
     );
