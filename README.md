@@ -191,15 +191,41 @@
 
   | Field      | Type          | Description    |
   | :--------- | :------------ | :------------- |
-  | question   | string        | 문제 내용      |
-  | answer     | string        | 정답           |
-  | userAnswer | string        | 사용자의 답변  |
-  | cratedAt   | timestamp     | 생성 시각      |
-  | updatedAt  | timestamp     | 수정 시각      |
-  | tags       | array[string] | 태그(optional) |
+  | question   | string        | The content of the question |
+  | answer     | string        | The correct answer|
+  | userAnswer | string        | The user's submitted answer|
+  | cratedAt   | timestamp     | Creation timestamp|
+  | updatedAt  | timestamp     | Last updated timestamp|
+  | tags       | array[string] | Tags (optional)|
 
 - **API Specifications (Input/Output Data Format):**
   - Created/Update Input Example
+    ```
+    {
+      "question": "What is the capital of France?",
+      "answer": "Paris",
+      "userAnswer": "Lyon",
+      "createdAt": "2025-06-03T06:00:00.000Z",
+      "updatedAt": "2025-06-03T06:00:00.000Z",
+      "tags": ["geography", "europe"]
+    }
+
+    ```
+  - Read Output Example
+    ```
+    [
+      {
+        "wrongNoteId": "abc123",
+        "question": "What is the capital of France?",
+        "answer": "Paris",
+        "userAnswer": "Lyon",
+        "createdAt": "2025-06-03T06:00:00.000Z",
+        "updatedAt": "2025-06-03T06:00:00.000Z",
+        "tags": ["geography", "europe"]
+      }
+    ]
+    ```
+
 
 ## 5. UI/UX Design
 
