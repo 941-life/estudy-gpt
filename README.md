@@ -1,5 +1,17 @@
 # App Development Technical Documentation
 
+## Table of Contents Example
+
+1. [Overview](#1-overview)
+2. [System Architecture](#2-system-architecture)
+3. [Feature Details](#3-feature-details)
+4. [Data Structure](#4-data-structure)
+5. [UI/UX Design](#5-uiux-design)
+6. [API Documentation](#6-api-documentation)
+7. [Setup & Deployment](#7-setup--deployment)
+8. [Testing](#8-testing)
+9. [Maintenance & Reference](#9-maintenance--reference)
+
 ## 1. Overview
 
 - **App Name:** eStudy GPT
@@ -158,9 +170,36 @@
 ## 4. Data Structure
 
 - **DB Design (ERD, Table Structure):**
+
   - Firestore structure:
+
+    ```
+    users (Collection)
+    └─ {userId} (Document)
+       └─ wrongNotes (Collection)
+            └─ {wrongNoteId} (Document)
+                 ├─ question: string
+                 ├─ answer: string
+                 ├─ userAnswer: string
+                 ├─ createdAt: timestamp
+                 ├─ updatedAt: timestamp
+                 └─ tags: [string]
+
+    ```
+
 - **Main Data Models and Attributes:**
+
+  | Field      | Type          | Description    |
+  | :--------- | :------------ | :------------- |
+  | question   | string        | 문제 내용      |
+  | answer     | string        | 정답           |
+  | userAnswer | string        | 사용자의 답변  |
+  | cratedAt   | timestamp     | 생성 시각      |
+  | updatedAt  | timestamp     | 수정 시각      |
+  | tags       | array[string] | 태그(optional) |
+
 - **API Specifications (Input/Output Data Format):**
+  - Created/Update Input Example
 
 ## 5. UI/UX Design
 
@@ -193,15 +232,3 @@
 - **Future Improvements:**
 
 ---
-
-## Table of Contents Example
-
-1. [Overview](#1-overview)
-2. [System Architecture](#2-system-architecture)
-3. [Feature Details](#3-feature-details)
-4. [Data Structure](#4-data-structure)
-5. [UI/UX Design](#5-uiux-design)
-6. [API Documentation](#6-api-documentation)
-7. [Setup & Deployment](#7-setup--deployment)
-8. [Testing](#8-testing)
-9. [Maintenance & Reference](#9-maintenance--reference)
