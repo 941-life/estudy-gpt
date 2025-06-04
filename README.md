@@ -68,6 +68,31 @@
   - Network failure: Show "Please check your internet connection."
   - Server error: Log error and show generic error message
 
+
+### Web Content & PDF Scraping with App Deep Linking Feature
+
+- **Purpose:**  
+  Allow users to scrape sentences (text) or PDF documents from a web browser and open them directly in the estudy_gpt app for AI-powered language learning.
+
+- **How It Works:**  
+  1. User selects text or a PDF file in the web browser.
+  2. User clicks the "estudy_gpt" button (via share menu or deep link).
+  3. The selected text or PDF is sent to the estudy_gpt app using a share intent or deep link.
+  4. The app receives the content, detects its type, and extracts text if needed.
+  5. The app displays language learning options.
+  6. User selects an option and receives AI-generated feedback.
+
+- **Screen/Flow:**  
+  - Select text or PDF in browser → Share to estudy_gpt → App opens with shared content → Content type detected and text extracted → User selects analysis option → AI result displayed
+
+- **Exception Handling:**  
+  - No shared content: Show "No shared content found."
+  - Invalid or empty input: Show error and prompt retry.
+  - PDF/text extraction errors: Show error and allow retry.
+  - API/network errors: Show error and allow retry.
+
+
+
 ### WebView-React Bridge & User Authentication Data Sync
 
 - **Purpose:**
