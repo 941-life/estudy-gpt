@@ -100,24 +100,12 @@
 ### Chatting
 
 - **Purpose:**
-  Allows users to sign in using Google account for personalized access
 
 - **How It Works:**
 
-  1. User click `Sign in with Google` button to login with Google account
-  2. Credentials are sent to Firebase Authentication
-  3. If authentication is successful, user data and token are returned
-  4. On failure, error message is shown
 
 - **Screen/Flow:**
-  - Login Screen -> Home Screen
-  - `Sign in with Google` button triggers Google login popup
-  - On success, navigate to Home Screen
-  - On failure, display error message
 - **Exception Handling:**
-  - Invalid credentials: Show "Check your account again."
-  - Network failure: Show "Please check your internet connection."
-  - Server error: Log error and show generic error message
 
 ### Wrong Note Screen (Firebase-based User Wrong Notes)
 
@@ -148,24 +136,12 @@
 ### Calendar
 
 - **Purpose:**
-  Allows users to sign in using Google account for personalized access
 
 - **How It Works:**
 
-  1. User click `Sign in with Google` button to login with Google account
-  2. Credentials are sent to Firebase Authentication
-  3. If authentication is successful, user data and token are returned
-  4. On failure, error message is shown
 
 - **Screen/Flow:**
-  - Login Screen -> Home Screen
-  - `Sign in with Google` button triggers Google login popup
-  - On success, navigate to Home Screen
-  - On failure, display error message
 - **Exception Handling:**
-  - Invalid credentials: Show "Check your account again."
-  - Network failure: Show "Please check your internet connection."
-  - Server error: Log error and show generic error message
 
 ## 4. Data Structure
 
