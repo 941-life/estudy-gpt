@@ -20,7 +20,14 @@
 
 ## 2. System Architecture
 
-- **Overall Architecture Diagram:** (Image/Link)
+- **Overall Architecture Diagram:**
+  ![High level diagram](./result/high_level_1.png)
+  _High Level Diagram_
+
+  ![low level diagram](./result/low_level_1.png)
+  ![low level diagram](./result/low_level_2.png)
+  _Low Level Diagram_
+
 - **Technology Stack:**
   - Language:
     - Flutter: Dart
