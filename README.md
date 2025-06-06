@@ -9,8 +9,7 @@
 5. [UI/UX Design](#5-uiux-design)
 6. [API Documentation](#6-api-documentation)
 7. [Setup & Deployment](#7-setup--deployment)
-8. [Testing](#8-testing)
-9. [Maintenance & Reference](#9-maintenance--reference)
+8. [Maintenance & Reference](#8-maintenance--reference)
 
 ## 1. Overview
 
@@ -68,13 +67,13 @@
   - Network failure: Show "Please check your internet connection."
   - Server error: Log error and show generic error message
 
-
 ### Web Content & PDF Scraping with App Deep Linking Feature
 
 - **Purpose:**  
   Allow users to scrape sentences (text) or PDF documents from a web browser and open them directly in the estudy_gpt app for AI-powered language learning.
 
-- **How It Works:**  
+- **How It Works:**
+
   1. User selects text or a PDF file in the web browser.
   2. User clicks the "estudy_gpt" button (via share menu or deep link).
   3. The selected text or PDF is sent to the estudy_gpt app using a share intent or deep link.
@@ -82,16 +81,15 @@
   5. The app displays language learning options.
   6. User selects an option and receives AI-generated feedback.
 
-- **Screen/Flow:**  
+- **Screen/Flow:**
+
   - Select text or PDF in browser → Share to estudy_gpt → App opens with shared content → Content type detected and text extracted → User selects analysis option → AI result displayed
 
-- **Exception Handling:**  
+- **Exception Handling:**
   - No shared content: Show "No shared content found."
   - Invalid or empty input: Show error and prompt retry.
   - PDF/text extraction errors: Show error and allow retry.
   - API/network errors: Show error and allow retry.
-
-
 
 ### WebView-React Bridge & User Authentication Data Sync
 
@@ -128,6 +126,7 @@
   Enable seamless real-time messaging between a Flutter app and a React-based web application, allowing authenticated users to chat with a chatbot within the web interface. Securely synchronize user authentication data, transmit conversation data in real time, and provide a personalized chat experience.
 
 - **How It Works:**
+
   - After a user logs in via the Flutter app, an authentication success message (`auth:success`) along with user information is sent to the web (WebView/iframe) via postMessage.
   - On the React web side, the useFlutterMessage(setUserData) hook listens for the window message event. When an authentication success message is received, the user information is saved to state.
   - Once authenticated user data is stored, the web chat component (ChatRoom) is activated, initializing the chat session and enabling real-time message exchange.
@@ -135,6 +134,7 @@
   - Communication between Flutter and the web is bidirectional, using window.postMessage and window.addEventListener(`"message", ...`).
 
 - **Screen/Flow:**
+
   - App Launch → Firebase Authentication (Flutter)
   - Upon successful authentication, Flutter sends user info to the web via postMessage
   - The web receives the authentication message with useFlutterMessage and stores user info
@@ -144,19 +144,25 @@
   - (Optional) After chat ends, provide conversation analysis, feedback, or level adjustment features
 
 - **Exception Handling:**
+
   - Unauthenticated State:
+
     - If the authentication message is not received or user info is missing, restrict access to the chat screen and display a login prompt or loading screen.
 
   - Message Reception Failure:
+
     - If the message format is invalid or a communication error occurs, display an error message and provide a retry option.
 
   - Network/Server Error:
+
     - If communication with the server or chatbot API fails, show an appropriate message and a retry button.
 
   - No Chat Data:
+
     - If there is no previous conversation history, display a message such as “No chat history found.”
 
   - Authorization/Security Issues:
+
     - If authentication data is forged or expired, terminate the session and redirect to the login screen.
 
   - Real-Time Sync Errors:
@@ -165,7 +171,7 @@
 ### Wrong Note Screen (Firebase-based User Wrong Notes)
 
 - **Purpose:**  
-  Allow users to view their personalized wrong note records, fetched from Firebase Firestore, within the Flutter app after authentication. 
+  Allow users to view their personalized wrong note records, fetched from Firebase Firestore, within the Flutter app after authentication.
 
 - **How It Works:**
 
@@ -193,7 +199,8 @@
 - **Purpose:**
   Provide users with a motivational, interactive calendar experience that visually tracks their daily learning progress and achievements. The feature also delivers personalized motivational messages and enables users to quickly check or update their learning status directly from their device’s home screen via native widgets.
 
-- **How It Works:** 
+- **How It Works:**
+
   - The main calendar UI is implemented in Flutter, displaying each month with daily statuses based on user activity (e.g., whether a wrong note was created on a given day).
 
   - When the user completes a daily task (such as creating a wrong note), the app determines if the task was completed and generates a motivational message using a static method (ChallengeCalendar.getMotivationalMessage).
@@ -207,6 +214,7 @@
   - The home screen widget itself is implemented natively (SwiftUI for iOS, XML/Kotlin for Android), but receives its data from the Flutter app via the home_widget interface
 
 - **Screen/Flow:**
+
   - App launch → Calendar screen displays monthly view with daily progress indicators.
 
   - User completes a daily learning task (e.g., creates a wrong note).
@@ -222,7 +230,9 @@
   - Home screen widget displays the latest status and message.
 
   - (Optional) User taps the widget, which launches the app or navigates to the relevant calendar/task screen.
+
 - **Exception Handling:**
+
   - Data Sync Issues:
 
     - If saving data to the widget fails (e.g., due to platform restrictions or storage errors), the app logs the error and can prompt the user to retry or check permissions.
@@ -265,17 +275,19 @@
 
 - **Main Data Models and Attributes:**
 
-  | Field      | Type          | Description    |
-  | :--------- | :------------ | :------------- |
+  | Field      | Type          | Description                 |
+  | :--------- | :------------ | :-------------------------- |
   | question   | string        | The content of the question |
-  | answer     | string        | The correct answer|
-  | userAnswer | string        | The user's submitted answer|
-  | cratedAt   | timestamp     | Creation timestamp|
-  | updatedAt  | timestamp     | Last updated timestamp|
-  | tags       | array[string] | Tags (optional)|
-  
+  | answer     | string        | The correct answer          |
+  | userAnswer | string        | The user's submitted answer |
+  | cratedAt   | timestamp     | Creation timestamp          |
+  | updatedAt  | timestamp     | Last updated timestamp      |
+  | tags       | array[string] | Tags (optional)             |
+
 - **API Specifications (Input/Output Data Format):**
+
   - Created/Update Input Example
+
     ```
     {
       "question": "What is the capital of France?",
@@ -287,6 +299,7 @@
     }
 
     ```
+
   - Read Output Example
     ```
     [
@@ -302,36 +315,587 @@
     ]
     ```
 
-
 ## 5. UI/UX Design
 
 - **List of Screens and Flowchart:**
-  
+
+  - Splash Screen (`splash_screen.dart`)
+
+  - Login Screen (`login_screen.dart`)
+
+  - Main Screen (`main_screen.dart`)
+
+  - Calendar Screen (`calendar_screen.dart`)
+
+  - Wrong Note Screen (`wrong_note_screen.dart`)
+
+  - Profile Screen (`profile_screen.dart`)
+
+  - Setting Screen (`setting_screen.dart`)
+
+  - Personal Screen (`personal_screen.dart`)
+
+  - Method Text Screen (`method_text_screen.dart`)
+
+  - Media Stream Screen (`media_stream_screen.dart`)
+
+  - Initial Media Screen (`initial_media_screen.dart`)
+
+  - Webview Bridge (`webview_bridge.dart`)
+
+  - Chat functionality is provided via WebView.
+
+- **Example User Flowchart**
+
+  ```
+  Splash Screen
+      ↓
+  Login Screen
+      ↓
+  Main Screen
+  ┌──────────────┬────────────────┬──────────────┬
+  ↓              ↓                ↓              ↓
+  Personal    Chatting          Wrong note    Setting
+  Screen      Screen            Screen        Screen
+    ↓            ↓
+  Method      Webview Bridge
+  Text        (chat)
+  Screen
+  ```
+
 - **Detailed Description for Each Screen:**
+
+  - Splash Screen
+
+    - Purpose: Displays the app logo and initial loading animation when the app launches.
+
+    - Key Features: App initialization, automatic login check, navigation to the next screen.
+
+  - Login Screen
+
+    - Purpose: User authentication (login).
+
+    - Key Features: Email/password input fields, login button, password recovery link.
+
+  - Main Screen
+
+    - Purpose: The main hub of the app, providing navigation to core features.
+
+    - Key Features: Bottom navigation bar or tab bar, access to Calendar, Wrong Note, Profile, etc.
+
+  - Calendar Screen
+
+    - Purpose: Manage and view schedules and events.
+
+    - Key Features: Calendar view, add/edit/delete events.
+
+  - Wrong Note Screen
+
+    - Purpose: Manage wrong answers or notes.
+
+    - Key Features: List of wrong notes, detail view, add/edit notes.
+
+  - Profile Screen
+
+    - Purpose: View and edit user information.
+
+    - Key Features: Profile picture, nickname, edit personal info.
+
+  - Setting Screen
+
+    - Purpose: App settings and preferences.
+
+    - Key Features: Notification settings, account management, other configurations.
+
+  - Personal Screen
+
+    - Purpose: Personalized features such as learning history and statistics.
+
+  - Method Text Screen
+
+    - Purpose: Provide learning methods and text-based resources.
+
+  - Media Stream Screen
+
+    - Purpose: Media (video/audio) streaming functionality.
+
+  - Initial Media Screen
+
+    - Purpose: Initial guide or selection screen for media content.
+
+  - Webview Bridge (Chat)
+
+    - Purpose: Provides chat functionality via an embedded WebView.
+
+  - Key Features: Chat UI and interaction handled through a web-based interface within the app.
+
 - **Wireframes/Design Mockups:** (Image/Link)
+
+  - `splash_screen.png`: App logo and loading indicator
+    ![splash screen](./result/splash_screen.png)
+  - `login_screen.png`: Email/password fields, login button
+    ![login screen](./result/login_screen.png)
+  - `chatting_screen.png`: Bottom navigation bar, main menu icons
+    ![chatting screen](./result/chatting_screen.png)
+    ![chatting screen](./result/chatting_screen2.png)
+  - `calendar_screen.png`: Personal Profile, Calendar UI, event list
+    ![profile screen](./result/profile_screen.png)
+  - `result_screen.png`: Show chatting result
+    ![result screen](./result/result_screen.png)
+    ![result screen](./result/result_screen2.png)
+  - `scrap_screen.png`: Web page context scrap
+    ![scrap screen](./result/web_scrap.png)
+    ![scrap screen](./result/scrap_screen2.png)
+    ![scrap screen](./result/scrap_screen3.png)
+  - `wrong_note_screen.png`: List of wrong notes, detail/edit buttons
+    ![wrong screen](./result/wrong_note.png)
+  - `pdf_share_screen.png`: List of wrong notes, detail/edit buttons
+    ![pdf screen](./result/pdf_screen.png)
 
 ## 6. API Documentation
 
 - **List of Endpoints:**
+  Certainly! Here’s how you would write an API Documentation section for your Flutter app, based on your use of Firebase Authentication, Firebase Database, Firebase Storage, and the shared intent handler. This documentation is written in a clear, professional style suitable for your project documentation.
+  | Feature | Method/Action | Endpoint/Path/Channel | Description | Auth Required |
+  |------------------------|---------------------------|-------------------------------|---------------------------------------------|--------------|
+  | Authentication | Sign In | Firebase Auth | Sign in user with email & password | No |
+  | | Get User Token | Firebase Auth | Retrieve current user's ID token | Yes |
+  | | Sign Out | Firebase Auth | Sign out current user | Yes |
+  | Database | Read User Profile | /users/{uid} | Get user profile from Firestore/RTDB | Yes |
+  | | Write User Profile | /users/{uid} | Update user profile | Yes |
+  | Storage | Upload File | /users/{uid}/files/{file} | Upload media file to Firebase Storage | Yes |
+  | | Download File | /users/{uid}/files/{file} | Download media file from Firebase Storage | Yes |
+  | WebView Bridge | Send Auth Data to WebView | JS Channel: FlutterBridge | Send user info/token to WebView (React) | Yes |
+  | | Receive Message from Web | JS Channel: FlutterBridge | Handle navigation/content messages | Yes |
+  | Shared Intent | Receive Shared Files | Platform Channel/Intent | Handle files/text shared from other apps | No |
+
 - **Request/Response Examples:**
+
+  1.  Firebase Authentication<br>
+      **Sign In (Email/Password)**
+
+      ```
+      UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: 'user@example.com',
+        password: 'password123',
+      );
+      ```
+
+      **Response**
+
+      ```
+      {
+        "user": {
+          "uid": "abc123",
+          "email": "user@example.com",
+          "displayName": "John Doe"
+        }
+      }
+
+      ```
+
+      **Get User Token**
+
+      ```
+      String? token = await user.getIdToken(true);
+      ```
+
+      **Response**
+
+      ```
+      {
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      }
+      ```
+
+  2.  Firebase Database (Firestore/Realtime Database)<br>
+      **Read User Profile**
+
+      ```
+      final doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+      ```
+
+      **Response**
+
+      ```
+      {
+        "uid": "abc123",
+        "email": "user@example.com",
+        "displayName": "John Doe",
+        "photoUrl": "https://..."
+      }
+      ```
+
+      **Write User Profile**
+
+      ```
+      await FirebaseFirestore.instance.collection('users').doc(uid).set({
+        "displayName": "New Name"
+      });
+
+      ```
+
+  3.  Firebase Storage<br>
+      **Upload File**
+
+      ```
+      final ref = FirebaseStorage.instance.ref().child('users/$uid/files/$filename');
+      await ref.putFile(file);
+
+      ```
+
+      **Response:**<br>
+      Success: Returns a StorageTaskSanpshot with metadata
+
+      **Download File**
+
+      ```
+      {
+        final url = await ref.getDownloadURL();
+      }
+
+      ```
+
+      **Response**
+
+      ```
+      {
+        "downloadUrl": "https://firebasestorage.googleapis.com/..."
+      }
+      ```
+
+  4.  WebView Bridge (Flutter <-> WebView)<br>
+      **Send User Data to WebView**
+
+      ```
+      controller.runJavaScript('''
+      window.postMessage({
+        type: 'auth:success',
+        email: '$email',
+        displayName: '$displayName',
+        photoUrl: '$photoUrl',
+        accessToken: '$accessToken',
+        uuid: '$uuid',
+      }, '*');
+      ''');
+      ```
+
+      **WebView Receives:**
+
+      ```
+      {
+        "type": "auth:success",
+        "email": "user@example.com",
+        "displayName": "John Doe",
+        "photoUrl": "...",
+        "accessToken": "...",
+        "uuid": "abc123"
+      }
+      ```
+
+      **Recieve Message from WebView**
+
+      ```
+      {
+        "type": "router:push",
+        "path": "https://example.com/page"
+      }
+      ```
+
+  5.  Shared Intent Handler<br>
+      **Received Shared Files/Text**
+
+      - Android/iOS system shares file/text to app
+      - Handler saves data to local storage and triggers a callback
+
+      ```
+      {
+        "type": "file",
+        "filePaths": ["/storage/emulated/0/Download/file.pdf"],
+        "text": "",
+        "timestamp": "2025-06-06T12:00:00Z"
+      }
+
+      ```
+
+      or
+
+      ```
+      {
+        "type": "text",
+        "filePaths": [],
+        "text": "Shared text content",
+        "timestamp": "2025-06-06T12:00:00Z"
+      }
+      ```
+
 - **Error Codes and Handling:**
+  | Code/Status | Description | Handling Recommendation |
+  |-------------------------------------|--------------------------------------|--------------------------------------------|
+  | firebase_auth/user-not-found | User not found | Show "User does not exist" message |
+  | firebase_auth/wrong-password | Incorrect password | Show "Incorrect password" message |
+  | firebase_auth/network-request-failed| Network error | Show "Check your internet connection" |
+  | permission-denied | No permission for DB/Storage | Prompt user to check permissions/login |
+  | storage/object-not-found | File not found in Storage | Show "File not found" message |
+  | webview/error | WebView failed to load page/message | Show error UI, allow retry |
+  | intent/error | Failed to process shared intent | Show error message, log error |
+
+  **General Handling Recommendations**
+
+  - For all errors, display user-friendly messages.
+  - Log errors for analytics/debugging.
+  - For authentication errors, prompt re-login if necessary.
+  - For network errors, allow user to retry.
 
 ## 7. Setup & Deployment
 
-- **Development Environment Setup:**
-- **Build and Deployment Procedures:**
-- **Environment Variables/Configuration Files:**
+### Development Environment Setup
 
-## 8. Testing
+1. **Prerequisites**
 
-- **Test Items and Methods:**
-- **Test Case Examples:**
-- **Automated Test Tools and Scripts:**
+   - Install a code editor (e.g., VSCode, Android Studio).
+   - Install Flutter SDK for your OS.
+   - Install Node.js and npm.
+   - Install Git.
+   - Sign up for a Firebase account and create a Firebase project.
 
-## 9. Maintenance & Reference
+2. **Install Required CLI Tools**
 
-- **Common Issues and Solutions:**
-- **Reference Documents/Links:**
-- **Future Improvements:**
+   - Install Firebase CLI globally:
+     ```
+     npm install -g firebase-tools
+     ```
+   - Log in to Firebase:
+     ```
+     firebase login
+     ```
+   - (For Flutter) Install FlutterFire CLI:
+     ```
+     dart pub global activate flutterfire_cli
+     ```
+
+3. **Configure Firebase for Flutter**
+
+   - In your Flutter project directory:
+     ```
+     flutterfire configure
+     ```
+   - Follow prompts to select platforms and your Firebase project.
+   - This generates `firebase_options.dart` in your `lib/` directory.
+
+4. **Add Firebase Plugins (Flutter)**
+
+   - Add required plugins:
+     ```
+     flutter pub add firebase_core
+     flutter pub add firebase_auth
+     flutter pub add cloud_firestore
+     flutter pub add firebase_storage
+     ```
+   - Initialize Firebase in `main.dart`:
+
+     ```
+     import 'package:firebase_core/firebase_core.dart';
+     import 'firebase_options.dart';
+
+     void main() async {
+       WidgetsFlutterBinding.ensureInitialized();
+       await Firebase.initializeApp(
+         options: DefaultFirebaseOptions.currentPlatform,
+       );
+       runApp(const MyApp());
+     }
+     ```
+
+5. **Set Up Firebase in React**
+
+   - In your React project directory:
+     ```
+     npm install firebase
+     ```
+   - Initialize Firebase in your React code:
+
+     ```
+     // src/firebase.js
+     import { initializeApp } from 'firebase/app';
+
+     const firebaseConfig = {
+       apiKey: "...",
+       authDomain: "...",
+       projectId: "...",
+       storageBucket: "...",
+       messagingSenderId: "...",
+       appId: "..."
+     };
+
+     const app = initializeApp(firebaseConfig);
+     export default app;
+     ```
 
 ---
+
+### Build and Deployment Procedures
+
+#### 1. Build Your Apps
+
+- **React Web**
+  - `npm run build`
+  - Output: 'build'
+
+#### 2. Set Up Firebase Hosting
+
+1. **Initialize Firebase Hosting (once per project)**
+
+- `firebase init hosting`
+- Select your Firebase project.
+- Set public directory:
+  - Flutter: `build/web`
+  - React: `build`
+- Configure as a single-page app? (Yes)
+- Do not overwrite `index.html` unless you want to reset it.
+
+2. **Deploy to Firebase Hosting**
+
+- `firebase deploy`
+- Your app will be available at:
+- `https://<your-project-id>.web.app`
+- `https://<your-project-id>.firebaseapp.com`
+
+#### 3. Hosting Multiple Apps (Optional)
+
+- To host both Flutter and React apps under different routes:
+- Use "rewrites" in `firebase.json`:
+
+  ```
+  {
+    "hosting": {
+      "rewrites": [
+        { "source": "/flutter/**", "destination": "/flutter/index.html" },
+        { "source": "/react/**", "destination": "/react/index.html" }
+      ]
+    }
+  }
+  ```
+
+- Place each built app in the corresponding folder (e.g., `public/flutter`, `public/react`).
+
+---
+
+### Environment Variables/Configuration Files
+
+- **Firebase Configuration**
+- Flutter: `firebase_options.dart` (auto-generated)
+- React: `.env` file or direct config
+
+  ```
+  REACT_APP_API_KEY=...
+  REACT_APP_AUTH_DOMAIN=...
+  REACT_APP_PROJECT_ID=...
+  ```
+
+- **Platform-Specific Files**
+- Android: `android/app/google-services.json`
+- iOS: `ios/Runner/GoogleService-Info.plist`
+- Web: Config object in code or `.env`
+
+- **.env Files (Optional)**
+- Store sensitive or environment-specific variables in `.env`.
+- Use `flutter_dotenv` (Flutter) or `dotenv` (React) to load them.
+
+---
+
+**References:**
+
+- [Firebase Hosting Documentation](https://firebase.google.com/docs/hosting)
+- [Create React App: Deployment](https://create-react-app.dev/docs/deployment/#firebase)
+
+## 8. Maintenance & Reference
+
+### Common Issues and Solutions
+
+1. **Firebase Authentication Failures**
+
+   - Issue: Users unable to log in or token refresh failures.
+   - Solution: Check network connectivity, ensure Firebase project configuration is correct, and verify token refresh logic.
+
+2. **WebView Loading Errors**
+
+   - Issue: WebView fails to load pages or JavaScript errors.
+   - Solution: Verify URLs, check JavaScript channel setup, and ensure WebView permissions are granted.
+
+3. **Shared Intent Handling Issues**
+
+   - Issue: Shared files or text not received or processed correctly.
+   - Solution: Confirm platform permissions, test intent listeners, and validate data storage logic.
+
+4. **Firebase Firestore/Database Permission Denied**
+
+   - Issue: Read/write operations fail due to permission errors.
+   - Solution: Review Firestore rules, ensure authenticated user has correct roles.
+
+5. **Firebase Storage Upload/Download Failures**
+
+   - Issue: Media files fail to upload or download.
+   - Solution: Check storage rules, network status, and file size limits.
+
+6. **App Crashes on Initialization**
+
+   - Issue: App crashes during Firebase initialization or WebView setup.
+   - Solution: Ensure all async initializations are awaited, check for null safety issues.
+
+7. **Performance Issues**
+   - Issue: Slow app startup or UI lag.
+   - Solution: Optimize Firebase queries, lazy load WebView content, and minimize heavy UI operations.
+
+---
+
+### Reference Documents/Links
+
+- [Flutter Official Documentation](https://flutter.dev/docs)
+- [Firebase for Flutter](https://firebase.flutter.dev/)
+- [WebView Flutter Plugin](https://pub.dev/packages/webview_flutter)
+- [Firebase Authentication](https://firebase.google.com/docs/auth)
+- [Firebase Firestore](https://firebase.google.com/docs/firestore)
+- [Firebase Storage](https://firebase.google.com/docs/storage)
+- [Receive Sharing Intent Plugin](https://pub.dev/packages/receive_sharing_intent)
+- [FlutterFire CLI](https://firebase.flutter.dev/docs/cli)
+- [Firebase Hosting](https://firebase.google.com/docs/hosting)
+- [React Official Documentation](https://reactjs.org/docs/getting-started.html)
+
+---
+
+### Future Improvements
+
+1. **Enhance WebView Integration**
+
+   - Improve communication between Flutter and WebView with more robust message handling.
+   - Add support for more complex interactions and events.
+
+2. **Expand Authentication Options**
+
+   - Add social login providers (Google, Facebook, Apple).
+   - Implement multi-factor authentication for enhanced security.
+
+3. **Improve Shared Intent Handling**
+
+   - Support more file types and larger files.
+   - Add better error handling and user feedback.
+
+4. **Optimize Firebase Usage**
+
+   - Implement offline data persistence and sync.
+   - Optimize Firestore queries and indexing.
+
+5. **UI/UX Enhancements**
+
+   - Add animations and transitions for smoother user experience.
+   - Improve accessibility features.
+
+6. **Performance Improvements**
+
+   - Reduce app startup time.
+   - Optimize memory usage and reduce battery consumption.
+
+7. **Automated Testing and CI/CD**
+   - Add unit, widget, and integration tests.
+   - Set up continuous integration and deployment pipelines.

@@ -42,7 +42,6 @@ class _MainScreenState extends State<MainScreen> {
         key: const ValueKey('webview_chat'),
         user: widget.user,
         initialUrl: 'https://estudy-5b2ba.web.app/',
-        // initialUrl: 'http://192.168.1.2:3000',
         onTitleChanged: (_) {},
       ),
     ];
@@ -50,18 +49,13 @@ class _MainScreenState extends State<MainScreen> {
 
   void _checkInitialTab() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // 공유된 데이터가 있는 경우 홈 탭(0)으로 이동
       if (widget.sharingType == 'text' || widget.sharingType == 'file') {
         setState(() => _selectedIndex = 0);
-      }
-      // 공유된 데이터가 없는 경우 학습 탭(1)으로 이동
-      else if (widget.sharingType == 'none' &&
+      } else if (widget.sharingType == 'none' &&
           widget.sharedText.isEmpty &&
           widget.sharedFiles.isEmpty) {
         setState(() => _selectedIndex = 1);
-      }
-      // 기본적으로는 홈 탭(0) 유지
-      else {
+      } else {
         setState(() => _selectedIndex = 0);
       }
     });

@@ -25,38 +25,3 @@ class SharedData {
     timestamp: DateTime.parse(json['timestamp']),
   );
 }
-// class SharedData {
-//   final String type; // 'text' or 'file'
-//   final String text;
-//   final List<String> filePaths;
-//   final DateTime timestamp;
-//   final String? question; // 추가: 선택한 질문
-//   final String? answer; // 추가: Gemini 답변
-
-//   SharedData({
-//     required this.type,
-//     required this.text,
-//     required this.filePaths,
-//     required this.timestamp,
-//     this.question,
-//     this.answer,
-//   });
-
-//   factory SharedData.fromJson(Map<String, dynamic> json) => SharedData(
-//     type: json['type'],
-//     text: json['text'],
-//     filePaths: List<String>.from(json['filePaths']),
-//     timestamp: DateTime.parse(json['timestamp']),
-//     question: json['question'],
-//     answer: json['answer'],
-//   );
-
-//   Map<String, dynamic> toJson() => {
-//     'type': type,
-//     'text': text,
-//     'filePaths': filePaths,
-//     'timestamp': timestamp.toIso8601String(),
-//     'question': question,
-//     'answer': answer,
-//   };
-// }
