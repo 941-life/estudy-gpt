@@ -17,7 +17,7 @@
 - **App Name:** eStudy GPT
 - **Version:** 1.0.0
 - **Summary of Purpose and Key Features:** Personalized, real-world language learning app
-- **Target Users:**
+- **Target Users:** Who wants to learn english
 
 ## 2. System Architecture
 
@@ -125,17 +125,47 @@
 ### Chatting
 
 - **Purpose:**
+  Enable seamless real-time messaging between a Flutter app and a React-based web application, allowing authenticated users to chat with a chatbot within the web interface. Securely synchronize user authentication data, transmit conversation data in real time, and provide a personalized chat experience.
 
 - **How It Works:**
-
+  - After a user logs in via the Flutter app, an authentication success message (`auth:success`) along with user information is sent to the web (WebView/iframe) via postMessage.
+  - On the React web side, the useFlutterMessage(setUserData) hook listens for the window message event. When an authentication success message is received, the user information is saved to state.
+  - Once authenticated user data is stored, the web chat component (ChatRoom) is activated, initializing the chat session and enabling real-time message exchange.
+  - Messages entered by the user are processed on the web and, if necessary, sent to a server or AI chatbot API. Response messages are displayed in the chat interface.
+  - Communication between Flutter and the web is bidirectional, using window.postMessage and window.addEventListener(`"message", ...`).
 
 - **Screen/Flow:**
+  - App Launch → Firebase Authentication (Flutter)
+  - Upon successful authentication, Flutter sends user info to the web via postMessage
+  - The web receives the authentication message with useFlutterMessage and stores user info
+  - Once user info is set, the user enters the chat screen (ChatRoom)
+  - User enters a message → Web sends the message to server/API/AI chatbot
+  - Response message is received and displayed in the chat list in real time
+  - (Optional) After chat ends, provide conversation analysis, feedback, or level adjustment features
+
 - **Exception Handling:**
+  - Unauthenticated State:
+    - If the authentication message is not received or user info is missing, restrict access to the chat screen and display a login prompt or loading screen.
+
+  - Message Reception Failure:
+    - If the message format is invalid or a communication error occurs, display an error message and provide a retry option.
+
+  - Network/Server Error:
+    - If communication with the server or chatbot API fails, show an appropriate message and a retry button.
+
+  - No Chat Data:
+    - If there is no previous conversation history, display a message such as “No chat history found.”
+
+  - Authorization/Security Issues:
+    - If authentication data is forged or expired, terminate the session and redirect to the login screen.
+
+  - Real-Time Sync Errors:
+    - If message synchronization is delayed, display a loading indicator and notify the user of network status.
 
 ### Wrong Note Screen (Firebase-based User Wrong Notes)
 
 - **Purpose:**  
-  Allow users to view their personalized wrong note records, fetched from Firebase Firestore, within the Flutter app after authentication.
+  Allow users to view their personalized wrong note records, fetched from Firebase Firestore, within the Flutter app after authentication. 
 
 - **How It Works:**
 
@@ -161,12 +191,57 @@
 ### Calendar
 
 - **Purpose:**
+  Provide users with a motivational, interactive calendar experience that visually tracks their daily learning progress and achievements. The feature also delivers personalized motivational messages and enables users to quickly check or update their learning status directly from their device’s home screen via native widgets.
 
-- **How It Works:**
+- **How It Works:** 
+  - The main calendar UI is implemented in Flutter, displaying each month with daily statuses based on user activity (e.g., whether a wrong note was created on a given day).
 
+  - When the user completes a daily task (such as creating a wrong note), the app determines if the task was completed and generates a motivational message using a static method (ChallengeCalendar.getMotivationalMessage).
+
+  - The app uses the home_widget package to save relevant data (e.g., task completion status, motivational message, and current date) to shared storage accessible by native home screen widgets.
+
+  - After saving the data, the app triggers a widget update using HomeWidget.updateWidget, ensuring that the home screen widget reflects the latest user progress and motivational message.
+
+  - The widget can be initialized and configured to listen for user interactions, such as widget clicks, which can launch the app or perform other actions.
+
+  - The home screen widget itself is implemented natively (SwiftUI for iOS, XML/Kotlin for Android), but receives its data from the Flutter app via the home_widget interface
 
 - **Screen/Flow:**
+  - App launch → Calendar screen displays monthly view with daily progress indicators.
+
+  - User completes a daily learning task (e.g., creates a wrong note).
+
+  - App calls ChallengeCalendarWidget.updateWidget to:
+
+    - Generate a motivational message based on task completion.
+
+    - Save the completion status, message, and current date via HomeWidget.saveWidgetData.
+
+    - Trigger a widget update with HomeWidget.updateWidget.
+
+  - Home screen widget displays the latest status and message.
+
+  - (Optional) User taps the widget, which launches the app or navigates to the relevant calendar/task screen.
 - **Exception Handling:**
+  - Data Sync Issues:
+
+    - If saving data to the widget fails (e.g., due to platform restrictions or storage errors), the app logs the error and can prompt the user to retry or check permissions.
+
+  - Widget Update Failure:
+
+    - If the widget fails to update (e.g., due to misconfigured provider names or missing native setup), the app logs the error for debugging and may show a notification to the user.
+
+  - App Group/Permission Issues (iOS):
+
+    - If setAppGroupId is not called or misconfigured, data sharing between the app and widget will fail. The app should check for and handle this case, possibly alerting the user to reinstall or update permissions.
+
+  - No Task Completed:
+
+    - If the user has not completed a daily task, the calendar and widget display an encouraging message to motivate the user to engage.
+
+  - Widget Interaction Issues:
+
+    - If the widget click event is not handled correctly, the app should log the URI and provide fallback navigation or feedback.
 
 ## 4. Data Structure
 
@@ -198,7 +273,7 @@
   | cratedAt   | timestamp     | Creation timestamp|
   | updatedAt  | timestamp     | Last updated timestamp|
   | tags       | array[string] | Tags (optional)|
-
+  
 - **API Specifications (Input/Output Data Format):**
   - Created/Update Input Example
     ```
@@ -231,6 +306,7 @@
 ## 5. UI/UX Design
 
 - **List of Screens and Flowchart:**
+  
 - **Detailed Description for Each Screen:**
 - **Wireframes/Design Mockups:** (Image/Link)
 
