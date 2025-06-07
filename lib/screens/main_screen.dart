@@ -33,7 +33,7 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
     _initializeWebViews();
-    _checkSharedData();
+    _checkInitialTab();
   }
 
   void _initializeWebViews() {
@@ -42,18 +42,23 @@ class _MainScreenState extends State<MainScreen> {
         key: const ValueKey('webview_chat'),
         user: widget.user,
         initialUrl: 'https://estudy-5b2ba.web.app/',
-        // initialUrl: 'http://192.168.1.2:3000',
         onTitleChanged: (_) {},
       ),
     ];
   }
 
-  void _checkSharedData() {
-    if (widget.sharingType == 'text' || widget.sharingType == 'file') {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
+  void _checkInitialTab() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.sharingType == 'text' || widget.sharingType == 'file') {
         setState(() => _selectedIndex = 0);
-      });
-    }
+      } else if (widget.sharingType == 'none' &&
+          widget.sharedText.isEmpty &&
+          widget.sharedFiles.isEmpty) {
+        setState(() => _selectedIndex = 1);
+      } else {
+        setState(() => _selectedIndex = 0);
+      }
+    });
   }
 
   void _onItemTapped(int index) {
