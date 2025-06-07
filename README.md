@@ -264,19 +264,39 @@
 
 - **DB Design (ERD, Table Structure):**
 
-  - Firestore structure:
+  - Firebase structure(Realtime Database):
 
     ```
     users (Collection)
     └─ {userId} (Document)
+       ├─ chat (Collection)
+       |    └─ updatedAt: string    
+       |    └─ {chatId} (Document)
+       |         ├─ characterId: int
+       |         ├─ content: string
+       |         ├─ role: string
+       |         └─ timestamp: int
+       ├─ levelHistory (Collection)
+       |    └─ {index} (Document)
+       |         ├─ changedAt: int
+       |         ├─ level: string
+       |         └─ reason: string    
+       ├─ recentScores (Collection)
+       |    └─ totalSession: int
+       |    └─ updatedAt: string
+       |    └─ {index} (Document)
+       |         ├─ score: int
+       |         └─ timestamp: string    
        └─ wrongNotes (Collection)
             └─ {wrongNoteId} (Document)
-                 ├─ question: string
-                 ├─ answer: string
-                 ├─ userAnswer: string
-                 ├─ createdAt: timestamp
-                 ├─ updatedAt: timestamp
-                 └─ tags: [string]
+                 ├─ analyzedAt: string
+                 ├─ messages: (collection)
+                 |    └─ {index} (Document)
+                 |          └─ content: string
+                 ├─ newCefrLevel: string
+                 ├─ previousCefrLevel: string
+                 ├─ score: int
+                 └─ summary: string
 
     ```
 
