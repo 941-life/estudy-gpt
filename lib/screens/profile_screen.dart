@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import '../models/wrong_note.dart';
 import '../widgets/challenge_calendar.dart';
 import '../widgets/common_app_bar.dart';
@@ -244,6 +245,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  Future<void> _handleLogout() async {
+    try {
+      // 1. Google 로그아웃
+      await GoogleSignIn().signOut();
+
+      // 2. Firebase 로그아웃
+      await FirebaseAuth.instance.signOut();
+
+      // 3. 스낵바 알림
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('로그아웃 되었습니다'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('로그아웃 실패: ${e.toString()}'),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
@@ -320,6 +350,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 );
               },
             ),
+            const SizedBox(height: 24),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: ElevatedButton(
+                onPressed: _handleLogout,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red[400],
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(double.infinity, 50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  '로그아웃',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
             ChallengeCalendar(
               title: _selectedChallenge,
               initialDate: _today,
